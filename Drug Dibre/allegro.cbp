@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="allegro" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/allegro" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="C:/allegro/include" />
+				</Compiler>
+				<Linker>
+					<Add option="`pkg-config --cflags --libs allegro-5.0.10 allegro_acodec-5.0.10 allegro_audio-5.0.10 allegro_color-5.0.10 allegro_dialog-5.0.10 allegro_font-5.0.10 allegro_image-5.0.10 allegro_main-5.0.10 allegro_memfile-5.0.10 allegro_physfs-5.0.10 allegro_primitives-5.0.10 allegro_ttf-5.0.10`" />
+					<Add library="C:\allegro\lib\liballegro-5.0.10-monolith-mt.a" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/allegro" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="C:/allegro/include" />
+		</Compiler>
+		<Linker>
+			<Add library="C:\allegro\lib\liballegro-5.0.10-monolith-mt.a" />
+		</Linker>
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,1 @@
+A proposta geral é criar um jogo 2D, tendo como base o jogo River Raid. O jogo terá apenas uma tela e consistirá no personagem desviar de drogas que são arremessadas à ele, enquanto tenta percorrer a máxima distância possível sem ser atingido.

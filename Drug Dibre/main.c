@@ -133,6 +133,9 @@ int main()
 
     display=al_create_display(SCREEN_W, SCREEN_H);
 
+    enemytimer=al_create_timer(1.0);
+    timer = al_create_timer(1/60.0);
+
     img_player=al_load_bitmap("sprites/player.png");
     img_enemy1=al_load_bitmap("sprites/enemy1a.png");
     img_enemyBullet=al_load_bitmap("sprites/enemybullet1a.png");

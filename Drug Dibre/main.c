@@ -10,9 +10,7 @@
 #define SCREEN_W 500
 #define SCREEN_H 800
 #define ENEMY1_MAX 22
-#define ENEMY2_MAX 22
-#define ENEMY3_MAX 11
-#define ENEMY_BULLETS_MAX 200
+#define ENEMY_BULLETS_MAX 20
 #define ENEMY_CHANCE 100
 
 enum
@@ -22,6 +20,7 @@ enum
     KEY_LEFT,
     KEY_DOWN,
     KEY_SPACE,
+    KEY_ESCAPE,
     KEY_MAX
 
 };
@@ -30,23 +29,32 @@ bool keys[KEY_MAX];
 
 typedef struct
 {
-
     int x;
     int y;
     bool live;
 
 } s_Object;
 
-
-void enemyshot(s_Object *enemy, s_Object *bullet, int *bulletcount, int *bulletid)
+typedef struct
 {
-    if(*bulletcount<ENEMY_BULLETS_MAX && !(bullet[*bulletid].live))
+    int maxFrame;
+    int curFrame;
+    int frameCount;
+    int frameDelay;
+    int frameWidth;
+    int frameHeight;
+
+}spr_anim;
+
+
+void enemyshot(s_Object *enemy, s_Object *bullet, int *bulletcount)
+{
+    if(*bulletcount<ENEMY_BULLETS_MAX)
     {
         bullet[*bulletcount].x=enemy->x;
         bullet[*bulletcount].y=enemy->y;
         bullet[*bulletcount].live=true;
-        (*bulletcount)++;
-        *bulletid=(*bulletid +1)%ENEMY_BULLETS_MAX;
+        (*bulletcount)=(*bulletcount)+1;
     }
 }
 
@@ -86,8 +94,6 @@ int main()
 
     ALLEGRO_BITMAP* img_player;
     ALLEGRO_BITMAP* img_enemy1;
-    ALLEGRO_BITMAP* img_enemy2;
-    ALLEGRO_BITMAP* img_enemy3;
     ALLEGRO_BITMAP* img_enemyBullet;
 
     ALLEGRO_FONT* fonte;
@@ -105,34 +111,26 @@ int main()
         enemy1[i].live=true;
     }
 
-    s_Object enemy2[ENEMY2_MAX];
-    for(i=0; i<ENEMY2_MAX; i++)
-    {
-        enemy2[i].x=(i%13)*32+46;
-        enemy2[i].y=(i/13)*32+52;
-        enemy2[i].live=true;
-    }
-
-    s_Object enemy3[ENEMY3_MAX];
-    for(i=0; i<ENEMY3_MAX; i++)
-    {
-        enemy3[i].x=(i%11)*32+49;
-        enemy3[i].y=(i/11)*32+20;
-        enemy3[i].live=true;
-    }
-
     s_Object enemybullet[ENEMY_BULLETS_MAX];
     for( i=0; i<ENEMY_BULLETS_MAX; i++)
     {
-        enemybullet[i].x=0;
-        enemybullet[i].y=0;
+        enemybullet[1].x=i;
+        enemybullet[1].y=i+5;
         enemybullet[i].live=false;
     }
-    int enemybulletcount=0;
-    int bulletid=0;
 
+    spr_anim playersheet;
+    playersheet.maxFrame=8;
+    playersheet.curFrame=0;
+    playersheet.frameCount=0;
+    playersheet.frameDelay=5;
+    playersheet.frameWidth=36;
+    playersheet.frameHeight=36;
+
+    int enemybulletcount=0;
     int gamestate=0;
     bool quit=false;
+
 
 
 
@@ -153,37 +151,15 @@ int main()
 
     display=al_create_display(SCREEN_W, SCREEN_H);
 
-    if(!display)
-    {
-        printf("erro\n");
-        exit (-1);
-    }
+    img_player=al_load_bitmap("sprites/player.png");
+    img_enemy1=al_load_bitmap("sprites/enemy1a.png");
+    img_enemyBullet=al_load_bitmap("sprites/enemybullet1a.png");
 
-    enemytimer=al_create_timer(1.0);
-    if (!enemytimer)
-    {
-        printf("erro enemytimer\n");
-        exit(-1);
-    }
-
-
-    timer = al_create_timer(1/60.0);
-
-    if(!timer)
-    {
-        printf("erro\n");
-        exit(-1);
-    }
-
-    img_player=al_load_bitmap("player.png");
-    img_enemy1=al_load_bitmap("enemy1a.png");
-    img_enemy2=al_load_bitmap("enemy2a.png");
-    img_enemy3=al_load_bitmap("enemy3a.png");
-    img_enemyBullet=al_load_bitmap("enemybullet1a.png");
+    al_convert_mask_to_alpha(img_player, al_map_rgb(255, 0, 255));
 
     al_reserve_samples(10);
 
-    fonte=al_load_ttf_font("Joystix.ttf", 24, 0);
+    fonte=al_load_ttf_font("fonts/Joystix.ttf", 24, 0);
 
     event_queue=al_create_event_queue();
 
@@ -223,7 +199,7 @@ int main()
             break;
         case 1:
             al_wait_for_event(event_queue, &ev);
-            if(ev.type ==ALLEGRO_EVENT_DISPLAY_CLOSE)
+            if(ev.type==ALLEGRO_EVENT_DISPLAY_CLOSE || ev.keyboard.keycode==ALLEGRO_KEY_ESCAPE)
             {
                 quit=true;
             }
@@ -244,6 +220,9 @@ int main()
                     break;
                 case ALLEGRO_KEY_RIGHT:
                     keys[KEY_RIGHT]=true;
+                    break;
+                case ALLEGRO_KEY_ESCAPE:
+                    keys[KEY_ESCAPE]=true;
                     break;
                 }
             }
@@ -266,106 +245,40 @@ int main()
                 case ALLEGRO_KEY_RIGHT:
                     keys[KEY_RIGHT]=false;
                     break;
+                case ALLEGRO_KEY_ESCAPE:
+                    keys[KEY_ESCAPE]=false;
+                    break;
                 }
             }
+
+            else if(ev.type==ALLEGRO_EVENT_TIMER)
+            {
+                if(++playersheet.frameCount>=playersheet.frameDelay)
+                {
+                    if(++playersheet.curFrame>=playersheet.maxFrame)
+                        playersheet.curFrame=0;
+
+                    playersheet.frameCount=0;
+                }
+
+            }
+
+
+
 
             if(ev.type==ALLEGRO_EVENT_TIMER)
             {
                 if(ev.timer.source==timer)
                 {
 
-                    if(rand() % ENEMY_CHANCE==0)
+                    if(rand() % ENEMY_CHANCE==0 || rand() % ENEMY_CHANCE==1 || rand() % ENEMY_CHANCE==2)
                     {
                         int coluna;
                         coluna=rand()%11;
-                        if(enemy1[coluna+11].live)
-                        {
-                            enemyshot(&enemy1[coluna+11], enemybullet, &enemybulletcount, &bulletid);
-                        }
-                        else if(enemy1[coluna].live)
-                        {
-                            enemyshot(&enemy1[coluna], enemybullet, &enemybulletcount, &bulletid);
-                        }
-                        else if(enemy2[coluna].live)
-                        {
-                            enemyshot(&enemy2[coluna+11], enemybullet, &enemybulletcount, &bulletid);
-                        }
-                        else if(enemy3[coluna].live)
-                        {
-                            enemyshot(&enemy3[coluna+11], enemybullet, &enemybulletcount, &bulletid);
-                        }
-
+                        enemyshot(&enemy1[coluna+11], enemybullet, &enemybulletcount);
 
                     }
-                    if(rand() % ENEMY_CHANCE==0)
-                    {
-                        int coluna;
-                        coluna=rand()%11;
-                        if(enemy1[coluna+11].live)
-                        {
-                            enemyshot(&enemy1[coluna+11], enemybullet, &enemybulletcount, &bulletid);
-                        }
-                        else if(enemy1[coluna].live)
-                        {
-                            enemyshot(&enemy1[coluna], enemybullet, &enemybulletcount, &bulletid);
-                        }
-                        else if(enemy2[coluna].live)
-                        {
-                            enemyshot(&enemy2[coluna+11], enemybullet, &enemybulletcount, &bulletid);
-                        }
-                        else if(enemy3[coluna].live)
-                        {
-                            enemyshot(&enemy3[coluna+11], enemybullet, &enemybulletcount, &bulletid);
-                        }
 
-
-                    }
-                    if(rand() % ENEMY_CHANCE==0)
-                    {
-                        int coluna;
-                        coluna=rand()%11;
-                        if(enemy1[coluna+11].live)
-                        {
-                            enemyshot(&enemy1[coluna+11], enemybullet, &enemybulletcount, &bulletid);
-                        }
-                        else if(enemy1[coluna].live)
-                        {
-                            enemyshot(&enemy1[coluna], enemybullet, &enemybulletcount, &bulletid);
-                        }
-                        else if(enemy2[coluna].live)
-                        {
-                            enemyshot(&enemy2[coluna+11], enemybullet, &enemybulletcount, &bulletid);
-                        }
-                        else if(enemy3[coluna].live)
-                        {
-                            enemyshot(&enemy3[coluna+11], enemybullet, &enemybulletcount, &bulletid);
-                        }
-
-
-                    }
-                    if(rand() % ENEMY_CHANCE==0)
-                    {
-                        int coluna;
-                        coluna=rand()%11;
-                        if(enemy1[coluna+11].live)
-                        {
-                            enemyshot(&enemy1[coluna+11], enemybullet, &enemybulletcount, &bulletid);
-                        }
-                        else if(enemy1[coluna].live)
-                        {
-                            enemyshot(&enemy1[coluna], enemybullet, &enemybulletcount, &bulletid);
-                        }
-                        else if(enemy2[coluna].live)
-                        {
-                            enemyshot(&enemy2[coluna+11], enemybullet, &enemybulletcount, &bulletid);
-                        }
-                        else if(enemy3[coluna].live)
-                        {
-                            enemyshot(&enemy3[coluna+11], enemybullet, &enemybulletcount, &bulletid);
-                        }
-
-
-                    }
 
 
                     if(keys[KEY_DOWN])
@@ -412,9 +325,8 @@ int main()
 
                     al_clear_to_color(al_map_rgb(0, 0, 0));
 
-                    //al_draw_filled_rectangle(player_x, player_y, player_x+32, player_y+32, al_map_rgb(0, 255, 0));
+                    al_draw_bitmap_region(img_player, playersheet.curFrame*playersheet.frameWidth, 0, playersheet.frameWidth, playersheet.frameHeight, player.x, player.y, 0);
 
-                    al_draw_bitmap(img_player, player.x, player.y, 0);
 
                     for(i=0; i<ENEMY1_MAX; i++)
                     {
@@ -425,23 +337,7 @@ int main()
                         }
 
                     }
-                    for(i=0; i<ENEMY2_MAX; i++)
-                    {
-                        if(enemy2[i].live)
-                        {
 
-                            al_draw_bitmap(img_enemy2, enemy2[i].x, enemy2[i].y, 0);
-                        }
-
-                    }
-                    for(i=0; i<ENEMY3_MAX; i++)
-                    {
-                        if(enemy3[i].live)
-                        {
-                            al_draw_bitmap(img_enemy3, enemy3[i].x, enemy3[i].y, 0);
-                        }
-
-                    }
 
                     for(i=0; i<ENEMY_BULLETS_MAX; i++)
                     {
@@ -474,8 +370,8 @@ int main()
                 if(ev.timer.source==timer)
                 {
                     al_clear_to_color(al_map_rgb(0, 0, 0));
-                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), SCREEN_W/2, SCREEN_H/2-30, ALLEGRO_ALIGN_CENTRE, "Game Over!");
-                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), SCREEN_W/2, SCREEN_H/2, ALLEGRO_ALIGN_CENTRE, "Nem clicou!");
+                    al_draw_textf(fonte, al_map_rgb(255,0,255), SCREEN_W/2, SCREEN_H/2-30, ALLEGRO_ALIGN_CENTRE, "Game Over!");
+                    al_draw_textf(fonte, al_map_rgb(255,0,255), SCREEN_W/2, SCREEN_H/2, ALLEGRO_ALIGN_CENTRE, "Nem clicou!");
                     al_flip_display();
                 }
             }
@@ -490,7 +386,7 @@ int main()
     al_destroy_timer(enemytimer);
     al_destroy_bitmap(img_player);
     al_destroy_bitmap(img_enemy1);
-    al_destroy_bitmap(img_enemy2);
+
 
 
     return 0;

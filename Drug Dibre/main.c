@@ -35,17 +35,6 @@ typedef struct
 
 } s_Object;
 
-typedef struct
-{
-    int maxFrame;
-    int curFrame;
-    int frameCount;
-    int frameDelay;
-    int frameWidth;
-    int frameHeight;
-
-}spr_anim;
-
 
 void enemyshot(s_Object *enemy, s_Object *bullet, int *bulletcount)
 {
@@ -119,13 +108,6 @@ int main()
         enemybullet[i].live=false;
     }
 
-    spr_anim playersheet;
-    playersheet.maxFrame=8;
-    playersheet.curFrame=0;
-    playersheet.frameCount=0;
-    playersheet.frameDelay=5;
-    playersheet.frameWidth=36;
-    playersheet.frameHeight=36;
 
     int enemybulletcount=0;
     int gamestate=0;
@@ -251,17 +233,6 @@ int main()
                 }
             }
 
-            else if(ev.type==ALLEGRO_EVENT_TIMER)
-            {
-                if(++playersheet.frameCount>=playersheet.frameDelay)
-                {
-                    if(++playersheet.curFrame>=playersheet.maxFrame)
-                        playersheet.curFrame=0;
-
-                    playersheet.frameCount=0;
-                }
-
-            }
 
 
 
@@ -325,7 +296,7 @@ int main()
 
                     al_clear_to_color(al_map_rgb(0, 0, 0));
 
-                    al_draw_bitmap_region(img_player, playersheet.curFrame*playersheet.frameWidth, 0, playersheet.frameWidth, playersheet.frameHeight, player.x, player.y, 0);
+                    al_draw_bitmap(img_player, player.x, player.y, 0);
 
 
                     for(i=0; i<ENEMY1_MAX; i++)

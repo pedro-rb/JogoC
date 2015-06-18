@@ -9,8 +9,8 @@
 
 #define SCREEN_W 500
 #define SCREEN_H 800
-#define ENEMY1_MAX 22
-#define ENEMY_BULLETS_MAX 20
+#define ENEMY1_MAX 11
+#define ENEMY_BULLETS_MAX 20000
 #define ENEMY_CHANCE 100
 
 enum
@@ -96,16 +96,16 @@ int main()
     s_Object enemy1[ENEMY1_MAX];
     for(i=0; i<ENEMY1_MAX; i++)
     {
-        enemy1[i].x=(i%13)*32+45;
-        enemy1[i].y=(i/13)*32+116;
+        enemy1[i].x=(i%11)*32+88;
+        enemy1[i].y=(i/11)*32;
         enemy1[i].live=true;
     }
 
     s_Object enemybullet[ENEMY_BULLETS_MAX];
-    for( i=0; i<ENEMY_BULLETS_MAX; i++)
+    for(i=0; i<ENEMY_BULLETS_MAX; i++)
     {
-        enemybullet[1].x=i;
-        enemybullet[1].y=i+5;
+        enemybullet[i].x=i;
+        enemybullet[i].y=i+5;
         enemybullet[i].live=false;
     }
 
@@ -138,11 +138,12 @@ int main()
     timer = al_create_timer(1/60.0);
 
     img_player=al_load_bitmap("sprites/player.png");
-    img_enemy1=al_load_bitmap("sprites/enemy1a.png");
+    img_enemy1=al_load_bitmap("sprites/enemya.png");
     img_enemyBullet=al_load_bitmap("sprites/enemybullet1a.png");
     img_street=al_load_bitmap("sprites/street.png");
 
     al_convert_mask_to_alpha(img_player, al_map_rgb(255, 0, 255));
+    al_convert_mask_to_alpha(img_enemy1, al_map_rgb(255, 255, 255));
 
     al_reserve_samples(10);
 
@@ -239,9 +240,6 @@ int main()
             }
 
 
-
-
-
             if(ev.type==ALLEGRO_EVENT_TIMER)
             {
                 if(ev.timer.source==timer)
@@ -251,7 +249,7 @@ int main()
                     {
                         int coluna;
                         coluna=rand()%11;
-                        enemyshot(&enemy1[coluna+11], enemybullet, &enemybulletcount);
+                        enemyshot(&enemy1[coluna], enemybullet, &enemybulletcount);
 
                     }
 
@@ -278,7 +276,7 @@ int main()
                     {
                         if(enemybullet[i].live)
                         {
-                            enemybullet[i].y+=5;
+                            enemybullet[i].y+=2;
 
 
                             if(enemybullet[i].x<player.x+al_get_bitmap_width(img_player) && player.x<enemybullet[i].x+al_get_bitmap_width(img_enemyBullet) &&

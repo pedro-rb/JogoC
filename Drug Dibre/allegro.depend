@@ -517,3 +517,16 @@
 	"allegro5/allegro.h"
 	"allegro5/allegro_font.h"
 
+1434649533 source:c:\users\aluno\desktop\jogoc\drug dibre\main.c
+	<stdio.h>
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+	<allegro5/allegro_image.h>
+	<allegro5/allegro_audio.h>
+	<allegro5/allegro_acodec.h>
+	<allegro5/allegro_font.h>
+	<allegro5/allegro_ttf.h>
+
+1401843466 c:\allegro5\include\allegro5\inline\fmaths.inl
+	"allegro5/error.h"
+

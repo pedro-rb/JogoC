@@ -49,21 +49,21 @@ void enemyshot(s_Object *enemy, s_Object *bullet, int *bulletcount)
 
 void player_collision_wall(s_Object *player, ALLEGRO_BITMAP* img_player)
 {
-    if(player->x < 0)
+    if(player->x < 56)
     {
-        player->x = 0;
+        player->x = 56;
     }
-    if(player->y < 0)
+    if(player->y < 36)
     {
-        player->y = 0;
+        player->y = 36;
     }
-    if(player->x > SCREEN_W - al_get_bitmap_width(img_player))
+    if(player->x > (SCREEN_W-50) - al_get_bitmap_width(img_player))
     {
-        player->x = SCREEN_W - al_get_bitmap_width(img_player);
+        player->x = (SCREEN_W-50) - al_get_bitmap_width(img_player);
     }
-    if(player->y > SCREEN_H - al_get_bitmap_height(img_player))
+    if(player->y > (SCREEN_H-52) - al_get_bitmap_height(img_player))
     {
-        player->y = SCREEN_H - al_get_bitmap_height(img_player);
+        player->y = (SCREEN_H-52) - al_get_bitmap_height(img_player);
     }
 }
 
@@ -84,6 +84,7 @@ int main()
     ALLEGRO_BITMAP* img_player;
     ALLEGRO_BITMAP* img_enemy1;
     ALLEGRO_BITMAP* img_enemyBullet;
+    ALLEGRO_BITMAP* img_street;
 
     ALLEGRO_FONT* fonte;
 
@@ -139,6 +140,7 @@ int main()
     img_player=al_load_bitmap("sprites/player.png");
     img_enemy1=al_load_bitmap("sprites/enemy1a.png");
     img_enemyBullet=al_load_bitmap("sprites/enemybullet1a.png");
+    img_street=al_load_bitmap("sprites/street.png");
 
     al_convert_mask_to_alpha(img_player, al_map_rgb(255, 0, 255));
 
@@ -257,19 +259,19 @@ int main()
 
                     if(keys[KEY_DOWN])
                     {
-                        player.y+=5;
+                        player.y+=3;
                     }
                     if(keys[KEY_UP])
                     {
-                        player.y-=5;
+                        player.y-=3;
                     }
                     if(keys[KEY_LEFT])
                     {
-                        player.x-=5;
+                        player.x-=3;
                     }
                     if(keys[KEY_RIGHT])
                     {
-                        player.x+=5;
+                        player.x+=3;
                     }
 
                     for(i=0; i<ENEMY_BULLETS_MAX; i++)
@@ -297,7 +299,7 @@ int main()
 
                     player_collision_wall(&player, img_player);
 
-                    al_clear_to_color(al_map_rgb(0, 0, 0));
+                    al_draw_bitmap(img_street, 0, 0, 0);
 
                     al_draw_bitmap(img_player, player.x, player.y, 0);
 
@@ -360,6 +362,7 @@ int main()
     al_destroy_timer(enemytimer);
     al_destroy_bitmap(img_player);
     al_destroy_bitmap(img_enemy1);
+    al_destroy_bitmap(img_street);
 
 
 

@@ -71,9 +71,10 @@ int main()
 {
 
     srand(time(NULL));
-
+    int velocidade_tiro;
     int i;
     int playerlives=3;
+    velocidade_tiro=50;
 
     ALLEGRO_DISPLAY* display;
     ALLEGRO_TIMER* timer;
@@ -238,6 +239,24 @@ int main()
                     break;
                 }
             }
+            printf("%d\n", velocidade_tiro);
+
+            if ( 20 > enemybulletcount && enemybulletcount > 10)
+            {
+                velocidade_tiro = 40;
+            };
+            if ( 50 > enemybulletcount && enemybulletcount > 30)
+            {
+                velocidade_tiro = 20;
+            };
+            if ( 100 > enemybulletcount && enemybulletcount > 50)
+            {
+                velocidade_tiro = 10;
+            };
+            if ( 300 > enemybulletcount && enemybulletcount > 100)
+            {
+                velocidade_tiro = 2;
+            };
 
 
             if(ev.type==ALLEGRO_EVENT_TIMER)
@@ -276,7 +295,7 @@ int main()
                     {
                         if(enemybullet[i].live)
                         {
-                            enemybullet[i].y+=2;
+                            enemybullet[i].y+=7;
 
 
                             if(enemybullet[i].x<player.x+al_get_bitmap_width(img_player) && player.x<enemybullet[i].x+al_get_bitmap_width(img_enemyBullet) &&

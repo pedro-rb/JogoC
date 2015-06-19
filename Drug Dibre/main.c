@@ -86,6 +86,7 @@ int main()
     ALLEGRO_BITMAP* img_enemy1;
     ALLEGRO_BITMAP* img_enemyBullet;
     ALLEGRO_BITMAP* img_street;
+    ALLEGRO_BITMAP* img_enemyBullet1;
 
     ALLEGRO_FONT* fonte;
 
@@ -109,6 +110,15 @@ int main()
         enemybullet[i].y=i+5;
         enemybullet[i].live=false;
     }
+
+     s_Object enemybullet1[ENEMY_BULLETS_MAX];
+    for(i=0; i<ENEMY_BULLETS_MAX; i++)
+    {
+        enemybullet1[i].x=i;
+        enemybullet1[i].y=i+5;
+        enemybullet1[i].live=false;
+    }
+
 
 
     int enemybulletcount=0;
@@ -140,12 +150,14 @@ int main()
 
     img_player=al_load_bitmap("sprites/player.png");
     img_enemy1=al_load_bitmap("sprites/enemya.png");
-    img_enemyBullet=al_load_bitmap("sprites/player.png");
-    /*img_enemyBullet1=al_load_bitmap("sprites/enemybullet1a.png");*/
+    img_enemyBullet=al_load_bitmap("sprites/crack.png");
+    img_enemyBullet1=al_load_bitmap("sprites/weed.png");
     img_street=al_load_bitmap("sprites/street.png");
 
     al_convert_mask_to_alpha(img_player, al_map_rgb(255, 0, 255));
     al_convert_mask_to_alpha(img_enemy1, al_map_rgb(255, 255, 255));
+    al_convert_mask_to_alpha(img_enemyBullet, al_map_rgb(152, 248, 248));
+    al_convert_mask_to_alpha(img_enemyBullet1, al_map_rgb(255, 255, 255));
 
     al_reserve_samples(10);
 
@@ -256,7 +268,7 @@ int main()
             };
             if ( 20 > enemybulletcount && enemybulletcount > 15)
             {
-                velocidade_tiro = 2;
+                velocidade_tiro = 4;
             };
 
 
@@ -270,7 +282,13 @@ int main()
                         int coluna;
                         coluna=rand()%11;
                         enemyshot(&enemy1[coluna], enemybullet, &enemybulletcount);
+                    }
 
+                    if(rand() % velocidade_tiro == 0)
+                    {
+                        int coluna;
+                        coluna=rand()%11;
+                        enemyshot(&enemy1[coluna], enemybullet1, &enemybulletcount);
                     }
 
 
@@ -300,7 +318,7 @@ int main()
 
 
                             if(enemybullet[i].x<player.x+al_get_bitmap_width(img_player) && player.x<enemybullet[i].x+al_get_bitmap_width(img_enemyBullet) &&
-                                    (enemybullet[i].y<player.y+al_get_bitmap_height(img_player) && player.y<enemybullet[i].y+al_get_bitmap_height(img_enemyBullet)))
+                                    (enemybullet1[i].y<player.y+al_get_bitmap_height(img_player) && player.y<enemybullet[i].y+al_get_bitmap_height(img_enemyBullet)))
                             {
                                 enemybullet[i].live=false;
                                 enemybulletcount--;
@@ -314,6 +332,23 @@ int main()
 
                         }
                     }
+                    for(i=0; i<ENEMY_BULLETS_MAX; i++)
+                    {
+                        if(enemybullet1[i].live)
+                        {
+                            enemybullet1[i].y+=7;
+
+
+                            if(enemybullet1[i].x<player.x+al_get_bitmap_width(img_player) && player.x<enemybullet1[i].x+al_get_bitmap_width(img_enemyBullet1) &&
+                                    (enemybullet1[i].y<player.y+al_get_bitmap_height(img_player) && player.y<enemybullet1[i].y+al_get_bitmap_height(img_enemyBullet1)))
+                            {
+                                enemybullet1[i].live=false;
+                                enemybulletcount--;
+                                playerlives--;
+                            }
+                        }
+                    }
+
 
                     player_collision_wall(&player, img_player);
 
@@ -341,6 +376,14 @@ int main()
                         if(enemybullet[i].live)
                         {
                             al_draw_bitmap(img_enemyBullet, enemybullet[i].x, enemybullet[i].y, 0);
+                        }
+
+                    }
+                    for(i=0; i<ENEMY_BULLETS_MAX; i++)
+                    {
+                        if(enemybullet1[i].live)
+                        {
+                            al_draw_bitmap(img_enemyBullet1, enemybullet1[i].x, enemybullet1[i].y, 0);
                         }
 
                     }

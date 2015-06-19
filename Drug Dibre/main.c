@@ -140,7 +140,8 @@ int main()
 
     img_player=al_load_bitmap("sprites/player.png");
     img_enemy1=al_load_bitmap("sprites/enemya.png");
-    img_enemyBullet=al_load_bitmap("sprites/enemybullet1a.png");
+    img_enemyBullet=al_load_bitmap("sprites/player.png");
+    /*img_enemyBullet1=al_load_bitmap("sprites/enemybullet1a.png");*/
     img_street=al_load_bitmap("sprites/street.png");
 
     al_convert_mask_to_alpha(img_player, al_map_rgb(255, 0, 255));
@@ -241,19 +242,19 @@ int main()
             }
             printf("%d\n", velocidade_tiro);
 
-            if ( 20 > enemybulletcount && enemybulletcount > 10)
+            if ( 5 > enemybulletcount && enemybulletcount > 2)
             {
                 velocidade_tiro = 40;
             };
-            if ( 50 > enemybulletcount && enemybulletcount > 30)
+            if ( 10 > enemybulletcount && enemybulletcount > 5)
             {
                 velocidade_tiro = 20;
             };
-            if ( 100 > enemybulletcount && enemybulletcount > 50)
+            if ( 15 > enemybulletcount && enemybulletcount > 10)
             {
                 velocidade_tiro = 10;
             };
-            if ( 300 > enemybulletcount && enemybulletcount > 100)
+            if ( 20 > enemybulletcount && enemybulletcount > 15)
             {
                 velocidade_tiro = 2;
             };
@@ -264,7 +265,7 @@ int main()
                 if(ev.timer.source==timer)
                 {
 
-                    if(rand() % ENEMY_CHANCE==0 || rand() % ENEMY_CHANCE==1 || rand() % ENEMY_CHANCE==2)
+                    if(rand() % velocidade_tiro == 0)
                     {
                         int coluna;
                         coluna=rand()%11;
@@ -319,6 +320,9 @@ int main()
                     al_draw_bitmap(img_street, 0, 0, 0);
 
                     al_draw_bitmap(img_player, player.x, player.y, 0);
+
+
+
 
 
                     for(i=0; i<ENEMY1_MAX; i++)

@@ -35,6 +35,17 @@ typedef struct
 
 } s_Object;
 
+typedef struct
+{
+    int maxframe;
+    int curframe;
+    int framecount;
+    int framedelay;
+    int framewidth;
+    int frameheight;
+
+}spr_anim;
+
 
 void enemyshot(s_Object *enemy, s_Object *bullet, int *bulletcount)
 {
@@ -71,10 +82,13 @@ int main()
 {
 
     srand(time(NULL));
-    int velocidade_tiro;
+
+    int velocidade_tiro=50;
     int i;
     int playerlives=3;
-    velocidade_tiro=50;
+    int enemybulletcount=0;
+    int gamestate=0;
+    bool quit=false;
 
     ALLEGRO_DISPLAY* display;
     ALLEGRO_TIMER* timer;
@@ -87,6 +101,7 @@ int main()
     ALLEGRO_BITMAP* img_enemyBullet;
     ALLEGRO_BITMAP* img_street;
     ALLEGRO_BITMAP* img_enemyBullet1;
+    ALLEGRO_BITMAP* img_player_sheet;
 
     ALLEGRO_FONT* fonte;
 
@@ -119,13 +134,13 @@ int main()
         enemybullet1[i].live=false;
     }
 
-
-
-    int enemybulletcount=0;
-    int gamestate=0;
-    bool quit=false;
-
-
+    spr_anim playermove;
+    playermove.maxframe=8;
+    playermove.curframe=0;
+    playermove.framecount=0;
+    playermove.framedelay=5;
+    playermove.framewidth=37;
+    playermove.frameheight=37;
 
 
     for(i=0; i<KEY_MAX; i++)
@@ -153,11 +168,13 @@ int main()
     img_enemyBullet=al_load_bitmap("sprites/crack.png");
     img_enemyBullet1=al_load_bitmap("sprites/weed.png");
     img_street=al_load_bitmap("sprites/street.png");
+    img_player_sheet=al_load_bitmap("sprites/player_sheet.png");
 
     al_convert_mask_to_alpha(img_player, al_map_rgb(255, 0, 255));
     al_convert_mask_to_alpha(img_enemy1, al_map_rgb(255, 255, 255));
     al_convert_mask_to_alpha(img_enemyBullet, al_map_rgb(152, 248, 248));
     al_convert_mask_to_alpha(img_enemyBullet1, al_map_rgb(255, 255, 255));
+    al_convert_mask_to_alpha(img_player_sheet, al_map_rgb(255, 0, 255));
 
     al_reserve_samples(10);
 
@@ -252,6 +269,8 @@ int main()
                     break;
                 }
             }
+
+
             printf("%d\n", velocidade_tiro);
 
             if ( 5 > enemybulletcount && enemybulletcount > 2)
@@ -270,6 +289,7 @@ int main()
             {
                 velocidade_tiro = 4;
             };
+
 
 
             if(ev.type==ALLEGRO_EVENT_TIMER)
@@ -318,7 +338,7 @@ int main()
 
 
                             if(enemybullet[i].x<player.x+al_get_bitmap_width(img_player) && player.x<enemybullet[i].x+al_get_bitmap_width(img_enemyBullet) &&
-                                    (enemybullet1[i].y<player.y+al_get_bitmap_height(img_player) && player.y<enemybullet[i].y+al_get_bitmap_height(img_enemyBullet)))
+                                    (enemybullet[i].y<player.y+al_get_bitmap_height(img_player) && player.y<enemybullet[i].y+al_get_bitmap_height(img_enemyBullet)))
                             {
                                 enemybullet[i].live=false;
                                 enemybulletcount--;
@@ -357,6 +377,16 @@ int main()
                     al_draw_bitmap(img_player, player.x, player.y, 0);
 
 
+                    if(++walking.frameCount >= walking.frameDelay)
+                    {
+                        if(++walking.curFrame >= walking.maxFrame)
+                        {
+                            walking.curFrame = 0;
+                        }
+                        walking.frameCount = 0;
+                    }
+
+                    al_draw_bitmap_region(img_player_walking, walking.curFrame * walking.frameWidth, 0, walking.frameWidth, walking.frameHeight, player.x - cameraX, player.y - cameraY);
 
 
 

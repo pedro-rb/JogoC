@@ -37,14 +37,14 @@ typedef struct
 
 typedef struct
 {
-    int maxframe;
-    int curframe;
-    int framecount;
-    int framedelay;
-    int framewidth;
-    int frameheight;
+    int maxFrame;
+    int curFrame;
+    int frameCount;
+    int frameDelay;
+    int frameWidth;
+    int frameHeight;
 
-}spr_anim;
+} spr_anim;
 
 
 void enemyshot(s_Object *enemy, s_Object *bullet, int *bulletcount)
@@ -88,6 +88,7 @@ int main()
     int playerlives=3;
     int enemybulletcount=0;
     int gamestate=0;
+    int playerstate=0;
     bool quit=false;
 
     ALLEGRO_DISPLAY* display;
@@ -102,6 +103,7 @@ int main()
     ALLEGRO_BITMAP* img_street;
     ALLEGRO_BITMAP* img_enemyBullet1;
     ALLEGRO_BITMAP* img_player_sheet;
+    ALLEGRO_BITMAP* img_player_idle;
 
     ALLEGRO_FONT* fonte;
 
@@ -126,7 +128,7 @@ int main()
         enemybullet[i].live=false;
     }
 
-     s_Object enemybullet1[ENEMY_BULLETS_MAX];
+    s_Object enemybullet1[ENEMY_BULLETS_MAX];
     for(i=0; i<ENEMY_BULLETS_MAX; i++)
     {
         enemybullet1[i].x=i;
@@ -135,12 +137,21 @@ int main()
     }
 
     spr_anim playermove;
-    playermove.maxframe=8;
-    playermove.curframe=0;
-    playermove.framecount=0;
-    playermove.framedelay=5;
-    playermove.framewidth=37;
-    playermove.frameheight=37;
+    playermove.maxFrame=2;
+    playermove.curFrame=0;
+    playermove.frameCount=0;
+    playermove.frameDelay=10;
+    playermove.frameWidth=36;
+    playermove.frameHeight=36;
+
+    spr_anim playeridle;
+    playeridle.maxFrame=2;
+    playeridle.curFrame=0;
+    playeridle.frameCount=0;
+    playeridle.frameDelay=30;
+    playeridle.frameWidth=36;
+    playeridle.frameHeight=36;
+
 
 
     for(i=0; i<KEY_MAX; i++)
@@ -169,12 +180,14 @@ int main()
     img_enemyBullet1=al_load_bitmap("sprites/weed.png");
     img_street=al_load_bitmap("sprites/street.png");
     img_player_sheet=al_load_bitmap("sprites/player_sheet.png");
+    img_player_idle=al_load_bitmap("sprites/player_idle.png");
 
     al_convert_mask_to_alpha(img_player, al_map_rgb(255, 0, 255));
     al_convert_mask_to_alpha(img_enemy1, al_map_rgb(255, 255, 255));
     al_convert_mask_to_alpha(img_enemyBullet, al_map_rgb(152, 248, 248));
     al_convert_mask_to_alpha(img_enemyBullet1, al_map_rgb(255, 255, 255));
     al_convert_mask_to_alpha(img_player_sheet, al_map_rgb(255, 0, 255));
+    al_convert_mask_to_alpha(img_player_idle, al_map_rgb(255, 0, 255));
 
     al_reserve_samples(10);
 
@@ -374,31 +387,159 @@ int main()
 
                     al_draw_bitmap(img_street, 0, 0, 0);
 
-                    al_draw_bitmap(img_player, player.x, player.y, 0);
-
-
-                    if(++walking.frameCount >= walking.frameDelay)
-                    {
-                        if(++walking.curFrame >= walking.maxFrame)
-                        {
-                            walking.curFrame = 0;
-                        }
-                        walking.frameCount = 0;
-                    }
-
-                    al_draw_bitmap_region(img_player_walking, walking.curFrame * walking.frameWidth, 0, walking.frameWidth, walking.frameHeight, player.x - cameraX, player.y - cameraY);
-
-
-
                     for(i=0; i<ENEMY1_MAX; i++)
                     {
-                        if(enemy1[i].live)
+                        if (enemy1[i].live)
                         {
-
                             al_draw_bitmap(img_enemy1, enemy1[i].x, enemy1[i].y, 0);
                         }
-
                     }
+
+
+
+
+                    if(!keys[KEY_UP] || !keys[KEY_DOWN] || !keys[KEY_LEFT] || !keys[KEY_RIGHT])
+                    {
+                        playerstate=0;
+                    }
+
+                    if(keys[KEY_UP] && !keys[KEY_DOWN] && !keys[KEY_LEFT] && !keys[KEY_RIGHT])
+                    {
+                        playerstate=1;
+                    }
+
+                    if(!keys[KEY_UP] && keys[KEY_DOWN] && !keys[KEY_LEFT] && !keys[KEY_RIGHT])
+                    {
+                        playerstate=2;
+                    }
+
+                    if(!keys[KEY_UP] && !keys[KEY_DOWN] && keys[KEY_LEFT] && !keys[KEY_RIGHT])
+                    {
+                        playerstate=3;
+                    }
+
+                    if(!keys[KEY_UP] && !keys[KEY_DOWN] && !keys[KEY_LEFT] && keys[KEY_RIGHT])
+                    {
+                        playerstate=4;
+                    }
+
+                    if((keys[KEY_UP] && !keys[KEY_DOWN]) && (keys[KEY_LEFT] || keys[KEY_RIGHT]))
+                    {
+                        playerstate=5;
+                    }
+
+                    if((!keys[KEY_UP] && keys[KEY_DOWN]) && (keys[KEY_LEFT] || keys[KEY_RIGHT]))
+                    {
+                        playerstate=6;
+                    }
+
+                    if(playerstate==0)
+                    {
+                        if(++playeridle.frameCount >= playeridle.frameDelay)
+                        {
+                            if(++playeridle.curFrame >= playeridle.maxFrame)
+                            {
+                                playeridle.curFrame = 0;
+                            }
+                            playeridle.frameCount = 0;
+                        }
+
+                        al_draw_bitmap_region(img_player_idle, playeridle.curFrame * playeridle.frameWidth, 0, playeridle.frameWidth, playeridle.frameHeight, player.x, player.y, 0);
+                    }
+
+                    if(playerstate==1)
+                    {
+                        if(++playermove.frameCount >= playermove.frameDelay)
+                        {
+                            if(++playermove.curFrame >= playermove.maxFrame)
+                            {
+                                playermove.curFrame = 0;
+                            }
+                            playermove.frameCount = 0;
+                        }
+
+                        al_draw_bitmap_region(img_player_sheet, (playermove.curFrame+2) * playermove.frameWidth, 0, playermove.frameWidth, playermove.frameHeight, player.x, player.y, 0);
+                    }
+
+                    if(playerstate==2)
+                    {
+                        if(++playermove.frameCount >= playermove.frameDelay)
+                        {
+                            if(++playermove.curFrame >= playermove.maxFrame)
+                            {
+                                playermove.curFrame = 0;
+                            }
+                            playermove.frameCount = 0;
+                        }
+
+                        al_draw_bitmap_region(img_player_sheet, (playermove.curFrame) * playermove.frameWidth, 0, playermove.frameWidth, playermove.frameHeight, player.x, player.y, 0);
+                    }
+
+                    if(playerstate==3)
+                    {
+                        if(++playermove.frameCount >= playermove.frameDelay)
+                        {
+                            if(++playermove.curFrame >= playermove.maxFrame)
+                            {
+                                playermove.curFrame = 0;
+                            }
+                            playermove.frameCount = 0;
+                        }
+
+                        al_draw_bitmap_region(img_player_sheet, (playermove.curFrame+6) * playermove.frameWidth, 0, playermove.frameWidth, playermove.frameHeight, player.x, player.y, 0);
+                    }
+
+                    if(playerstate==4)
+                    {
+                        if(++playermove.frameCount >= playermove.frameDelay)
+                        {
+                            if(++playermove.curFrame >= playermove.maxFrame)
+                            {
+                                playermove.curFrame = 0;
+                            }
+                            playermove.frameCount = 0;
+                        }
+
+                        al_draw_bitmap_region(img_player_sheet, (playermove.curFrame+4) * playermove.frameWidth, 0, playermove.frameWidth, playermove.frameHeight, player.x, player.y, 0);
+                    }
+
+                    if(playerstate==5)
+                    {
+                        if(++playermove.frameCount >= playermove.frameDelay)
+                        {
+                            if(++playermove.curFrame >= playermove.maxFrame)
+                            {
+                                playermove.curFrame = 0;
+                            }
+                            playermove.frameCount = 0;
+                        }
+
+                        al_draw_bitmap_region(img_player_sheet, (playermove.curFrame+2) * playermove.frameWidth, 0, playermove.frameWidth, playermove.frameHeight, player.x, player.y, 0);
+                    }
+
+                    if(playerstate==6)
+                    {
+                        if(++playermove.frameCount >= playermove.frameDelay)
+                        {
+                            if(++playermove.curFrame >= playermove.maxFrame)
+                            {
+                                playermove.curFrame = 0;
+                            }
+                            playermove.frameCount = 0;
+                        }
+
+                        al_draw_bitmap_region(img_player_sheet, (playermove.curFrame) * playermove.frameWidth, 0, playermove.frameWidth, playermove.frameHeight, player.x, player.y, 0);
+                    }
+
+
+
+
+
+
+
+
+
+
 
 
                     for(i=0; i<ENEMY_BULLETS_MAX; i++)
@@ -457,6 +598,7 @@ int main()
     al_destroy_bitmap(img_player);
     al_destroy_bitmap(img_enemy1);
     al_destroy_bitmap(img_street);
+    al_destroy_bitmap(img_player_sheet);
 
 
 

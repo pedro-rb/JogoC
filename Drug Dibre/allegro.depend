@@ -517,7 +517,11 @@
 	"allegro5/allegro.h"
 	"allegro5/allegro_font.h"
 
+<<<<<<< HEAD
+1435348423 source:c:\users\aluno\desktop\jogoc\drug dibre\main.c
+=======
 1435350303 source:c:\users\aluno\desktop\jogoc\drug dibre\main.c
+>>>>>>> 6b413561857d8586b94688f8587e95cab72583fc
 	<stdio.h>
 	<allegro5/allegro.h>
 	<allegro5/allegro_primitives.h>

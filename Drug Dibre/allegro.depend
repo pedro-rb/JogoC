@@ -517,11 +517,7 @@
 	"allegro5/allegro.h"
 	"allegro5/allegro_font.h"
 
-<<<<<<< HEAD
-1435348423 source:c:\users\aluno\desktop\jogoc\drug dibre\main.c
-=======
-1435350303 source:c:\users\aluno\desktop\jogoc\drug dibre\main.c
->>>>>>> 6b413561857d8586b94688f8587e95cab72583fc
+1435350038 source:c:\users\aluno\desktop\jogoc\drug dibre\main.c
 	<stdio.h>
 	<allegro5/allegro.h>
 	<allegro5/allegro_primitives.h>
@@ -774,4 +770,24 @@
 1362338300 c:\allegro5\include\allegro5\allegro_ttf.h
 	"allegro5/allegro.h"
 	"allegro5/allegro_font.h"
+
+1435445770 source:c:\users\pedro\desktop\jogoc\drug dibre\main.c
+	<stdio.h>
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+	<allegro5/allegro_image.h>
+	<allegro5/allegro_audio.h>
+	<allegro5/allegro_acodec.h>
+	<allegro5/allegro_font.h>
+	<allegro5/allegro_ttf.h>
+
+1435628322 source:d:\meus documentos\documents\pedro\ifsc\jogoc\drug dibre\main.c
+	<stdio.h>
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+	<allegro5/allegro_image.h>
+	<allegro5/allegro_audio.h>
+	<allegro5/allegro_acodec.h>
+	<allegro5/allegro_font.h>
+	<allegro5/allegro_ttf.h>
 

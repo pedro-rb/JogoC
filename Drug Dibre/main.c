@@ -80,7 +80,8 @@ void player_collision_wall(s_Object *player, ALLEGRO_BITMAP* img_player)
 
 int main()
 {
-
+    int maconha=30;
+    int patolino=45;
     srand(time(NULL));
 
     int velocidade_tiro=50;
@@ -102,8 +103,12 @@ int main()
     ALLEGRO_BITMAP* img_enemyBullet;
     ALLEGRO_BITMAP* img_street;
     ALLEGRO_BITMAP* img_enemyBullet1;
+<<<<<<< HEAD
+    ALLEGRO_BITMAP* img_enemyBullet2;
+=======
     ALLEGRO_BITMAP* img_player_sheet;
     ALLEGRO_BITMAP* img_player_idle;
+>>>>>>> 6b413561857d8586b94688f8587e95cab72583fc
 
     ALLEGRO_FONT* fonte;
 
@@ -136,6 +141,16 @@ int main()
         enemybullet1[i].live=false;
     }
 
+<<<<<<< HEAD
+    s_Object enemybullet2[ENEMY_BULLETS_MAX];
+    for(i=0; i<ENEMY_BULLETS_MAX; i++)
+    {
+        enemybullet2[i].x=i;
+        enemybullet2[i].y=i+5;
+        enemybullet2[i].live=false;
+    }
+
+=======
     spr_anim playermove;
     playermove.maxFrame=2;
     playermove.curFrame=0;
@@ -143,6 +158,7 @@ int main()
     playermove.frameDelay=10;
     playermove.frameWidth=36;
     playermove.frameHeight=36;
+>>>>>>> 6b413561857d8586b94688f8587e95cab72583fc
 
     spr_anim playeridle;
     playeridle.maxFrame=2;
@@ -178,16 +194,21 @@ int main()
     img_enemy1=al_load_bitmap("sprites/enemya.png");
     img_enemyBullet=al_load_bitmap("sprites/crack.png");
     img_enemyBullet1=al_load_bitmap("sprites/weed.png");
+    img_enemyBullet2=al_load_bitmap("sprites/patolino.png");
     img_street=al_load_bitmap("sprites/street.png");
     img_player_sheet=al_load_bitmap("sprites/player_sheet.png");
     img_player_idle=al_load_bitmap("sprites/player_idle.png");
 
     al_convert_mask_to_alpha(img_player, al_map_rgb(255, 0, 255));
     al_convert_mask_to_alpha(img_enemy1, al_map_rgb(255, 255, 255));
-    al_convert_mask_to_alpha(img_enemyBullet, al_map_rgb(152, 248, 248));
+    al_convert_mask_to_alpha(img_enemyBullet, al_map_rgb(0, 0, 0));
     al_convert_mask_to_alpha(img_enemyBullet1, al_map_rgb(255, 255, 255));
+<<<<<<< HEAD
+    al_convert_mask_to_alpha(img_enemyBullet2, al_map_rgb(255, 255, 255));
+=======
     al_convert_mask_to_alpha(img_player_sheet, al_map_rgb(255, 0, 255));
     al_convert_mask_to_alpha(img_player_idle, al_map_rgb(255, 0, 255));
+>>>>>>> 6b413561857d8586b94688f8587e95cab72583fc
 
     al_reserve_samples(10);
 
@@ -277,6 +298,8 @@ int main()
                 case ALLEGRO_KEY_RIGHT:
                     keys[KEY_RIGHT]=false;
                     break;
+
+
                 case ALLEGRO_KEY_ESCAPE:
                     keys[KEY_ESCAPE]=false;
                     break;
@@ -286,21 +309,21 @@ int main()
 
             printf("%d\n", velocidade_tiro);
 
-            if ( 5 > enemybulletcount && enemybulletcount > 2)
+            if ( 20 > enemybulletcount && enemybulletcount > 2)
+            {
+                velocidade_tiro = 65;
+            };
+            if ( 45 > enemybulletcount && enemybulletcount > 20)
             {
                 velocidade_tiro = 40;
             };
-            if ( 10 > enemybulletcount && enemybulletcount > 5)
+            if ( 60 > enemybulletcount && enemybulletcount > 45)
             {
-                velocidade_tiro = 20;
+                velocidade_tiro = 35;
             };
-            if ( 15 > enemybulletcount && enemybulletcount > 10)
+            if ( 100 > enemybulletcount && enemybulletcount > 60)
             {
-                velocidade_tiro = 10;
-            };
-            if ( 20 > enemybulletcount && enemybulletcount > 15)
-            {
-                velocidade_tiro = 4;
+                velocidade_tiro = 30;
             };
 
 
@@ -316,12 +339,25 @@ int main()
                         coluna=rand()%11;
                         enemyshot(&enemy1[coluna], enemybullet, &enemybulletcount);
                     }
-
-                    if(rand() % velocidade_tiro == 0)
+                    if (enemybulletcount > maconha)
                     {
-                        int coluna;
-                        coluna=rand()%11;
-                        enemyshot(&enemy1[coluna], enemybullet1, &enemybulletcount);
+                        if(rand() % velocidade_tiro == 0)
+                        {
+                            int coluna;
+                            coluna=rand()%11;
+                            enemyshot(&enemy1[coluna], enemybullet1, &enemybulletcount);
+                        }
+                    }
+                    if (enemybulletcount > patolino)
+                    {
+
+
+                        if(rand() % velocidade_tiro == 0)
+                        {
+                            int coluna;
+                            coluna=rand()%11;
+                            enemyshot(&enemy1[coluna], enemybullet2, &enemybulletcount);
+                        }
                     }
 
 
@@ -342,13 +378,12 @@ int main()
                     {
                         player.x+=3;
                     }
-
+                    /*-------------------------------------------------------------------------*/
                     for(i=0; i<ENEMY_BULLETS_MAX; i++)
                     {
                         if(enemybullet[i].live)
                         {
-                            enemybullet[i].y+=7;
-
+                            enemybullet[i].y+=10;
 
                             if(enemybullet[i].x<player.x+al_get_bitmap_width(img_player) && player.x<enemybullet[i].x+al_get_bitmap_width(img_enemyBullet) &&
                                     (enemybullet[i].y<player.y+al_get_bitmap_height(img_player) && player.y<enemybullet[i].y+al_get_bitmap_height(img_enemyBullet)))
@@ -365,24 +400,46 @@ int main()
 
                         }
                     }
-                    for(i=0; i<ENEMY_BULLETS_MAX; i++)
+                    /*-------------------------------------------------------------------------*/
+                    if ( enemybulletcount > maconha)
                     {
-                        if(enemybullet1[i].live)
+                        for(i=0; i<ENEMY_BULLETS_MAX; i++)
                         {
-                            enemybullet1[i].y+=7;
-
-
-                            if(enemybullet1[i].x<player.x+al_get_bitmap_width(img_player) && player.x<enemybullet1[i].x+al_get_bitmap_width(img_enemyBullet1) &&
-                                    (enemybullet1[i].y<player.y+al_get_bitmap_height(img_player) && player.y<enemybullet1[i].y+al_get_bitmap_height(img_enemyBullet1)))
+                            if(enemybullet1[i].live)
                             {
-                                enemybullet1[i].live=false;
-                                enemybulletcount--;
-                                playerlives--;
+                                enemybullet1[i].y+=7;
+
+                                if(enemybullet1[i].x<player.x+al_get_bitmap_width(img_player) && player.x<enemybullet1[i].x+al_get_bitmap_width(img_enemyBullet1) &&
+                                        (enemybullet1[i].y<player.y+al_get_bitmap_height(img_player) && player.y<enemybullet1[i].y+al_get_bitmap_height(img_enemyBullet1)))
+                                {
+                                    enemybullet1[i].live=false;
+                                    enemybulletcount--;
+                                    playerlives--;
+                                }
                             }
                         }
                     }
 
+                    /*-------------------------------------------------------------------------*/
+                    if ( enemybulletcount > patolino)
+                    {
+                        for(i=0; i<ENEMY_BULLETS_MAX; i++)
+                        {
+                            if(enemybullet2[i].live)
+                            {
+                                enemybullet2[i].y+=7;
 
+                                if(enemybullet2[i].x<player.x+al_get_bitmap_width(img_player) && player.x<enemybullet2[i].x+al_get_bitmap_width(img_enemyBullet2) &&
+                                        (enemybullet2[i].y<player.y+al_get_bitmap_height(img_player) && player.y<enemybullet2[i].y+al_get_bitmap_height(img_enemyBullet2)))
+                                {
+                                    enemybullet2[i].live=false;
+                                    enemybulletcount--;
+                                    playerlives--;
+                                }
+                            }
+                        }
+                    }
+                    /*-------------------------------------------------------------------------*/
                     player_collision_wall(&player, img_player);
 
                     al_draw_bitmap(img_street, 0, 0, 0);
@@ -488,6 +545,9 @@ int main()
 
                         al_draw_bitmap_region(img_player_sheet, (playermove.curFrame+6) * playermove.frameWidth, 0, playermove.frameWidth, playermove.frameHeight, player.x, player.y, 0);
                     }
+<<<<<<< HEAD
+                    /*-------------------------------------------------------------------------*/
+=======
 
                     if(playerstate==4)
                     {
@@ -541,6 +601,7 @@ int main()
 
 
 
+>>>>>>> 6b413561857d8586b94688f8587e95cab72583fc
 
                     for(i=0; i<ENEMY_BULLETS_MAX; i++)
                     {
@@ -550,14 +611,29 @@ int main()
                         }
 
                     }
-                    for(i=0; i<ENEMY_BULLETS_MAX; i++)
-                    {
-                        if(enemybullet1[i].live)
-                        {
-                            al_draw_bitmap(img_enemyBullet1, enemybullet1[i].x, enemybullet1[i].y, 0);
-                        }
 
+                    if ( enemybulletcount > maconha)
+                    {
+                        for(i=0; i<ENEMY_BULLETS_MAX; i++)
+                        {
+                            if(enemybullet1[i].live)
+                            {
+                                al_draw_bitmap(img_enemyBullet1, enemybullet1[i].x, enemybullet1[i].y, 0);
+                            }
+                        }
                     }
+
+                    if ( enemybulletcount > patolino)
+                    {
+                        for(i=0; i<ENEMY_BULLETS_MAX; i++)
+                        {
+                            if(enemybullet2[i].live)
+                            {
+                                al_draw_bitmap(img_enemyBullet2, enemybullet2[i].x, enemybullet2[i].y, 0);
+                            }
+                        }
+                    }
+
 
                     al_flip_display();
                 }

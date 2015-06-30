@@ -33,10 +33,10 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add directory="C:/Program Files (x86)/allegro-5.0.10-mingw-4.7.0/include" />
+			<Add directory="../../../../../allegro5/include" />
 		</Compiler>
 		<Linker>
-			<Add library="C:\Program Files (x86)\allegro-5.0.10-mingw-4.7.0\lib\liballegro-5.0.10-monolith-mt.a" />
+			<Add library="..\..\..\..\..\allegro5\lib\liballegro-5.0.10-monolith-mt.a" />
 		</Linker>
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />

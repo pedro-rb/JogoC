@@ -11,7 +11,7 @@
 #define SCREEN_H 800
 #define ENEMY1_MAX 11
 #define ENEMY_BULLETS_MAX 20000
-#define ENEMY_CHANCE 100
+#define FPS 60.0
 
 enum
 {
@@ -21,6 +21,7 @@ enum
     KEY_DOWN,
     KEY_SPACE,
     KEY_ESCAPE,
+    KEY_P,
     KEY_MAX
 
 };
@@ -60,17 +61,17 @@ void enemyshot(s_Object *enemy, s_Object *bullet, int *bulletcount)
 
 void player_collision_wall(s_Object *player, ALLEGRO_BITMAP* img_player)
 {
-    if(player->x < 56)
+    if(player->x < 76)
     {
-        player->x = 56;
+        player->x = 76;
     }
     if(player->y < 36)
     {
         player->y = 36;
     }
-    if(player->x > (SCREEN_W-50) - al_get_bitmap_width(img_player))
+    if(player->x > (SCREEN_W-70) - al_get_bitmap_width(img_player))
     {
-        player->x = (SCREEN_W-50) - al_get_bitmap_width(img_player);
+        player->x = (SCREEN_W-70) - al_get_bitmap_width(img_player);
     }
     if(player->y > (SCREEN_H-52) - al_get_bitmap_height(img_player))
     {
@@ -109,7 +110,6 @@ int main()
     srand(time(NULL));
 
     int i;
-    int k=3;
     int velocidade_tiro=50;
     int enemybulletcount=0;
     int gamestate=0;
@@ -118,6 +118,8 @@ int main()
     int maconha=30;
     int patolino=45;
     int score=0;
+    int phit=0;
+    int phitcount=0;
     bool quit=false;
 
     ALLEGRO_DISPLAY* display;
@@ -152,7 +154,7 @@ int main()
     s_Object enemy1[ENEMY1_MAX];
     for(i=0; i<ENEMY1_MAX; i++)
     {
-        enemy1[i].x=(i%11)*32+88;
+        enemy1[i].x=(i%11)*32+76;
         enemy1[i].y=(i/11)*32;
         enemy1[i].live=true;
     }
@@ -242,7 +244,7 @@ int main()
 
     display=al_create_display(SCREEN_W, SCREEN_H);
 
-    timer = al_create_timer(1/60.0);
+    timer = al_create_timer(1/FPS);
 
     img_player=al_load_bitmap("sprites/player.png");
     img_enemy1=al_load_bitmap("sprites/enemya.png");
@@ -317,6 +319,10 @@ int main()
             {
                 quit=true;
             }
+            if(ev.keyboard.keycode==ALLEGRO_KEY_P)
+            {
+                gamestate=4;
+            }
 
             if(ev.type==ALLEGRO_EVENT_KEY_DOWN)
             {
@@ -337,6 +343,9 @@ int main()
                     break;
                 case ALLEGRO_KEY_ESCAPE:
                     keys[KEY_ESCAPE]=true;
+                    break;
+                case ALLEGRO_KEY_P:
+                    keys[KEY_P]=true;
                     break;
                 }
             }
@@ -361,6 +370,9 @@ int main()
                     break;
                 case ALLEGRO_KEY_ESCAPE:
                     keys[KEY_ESCAPE]=false;
+                    break;
+                case ALLEGRO_KEY_P:
+                    keys[KEY_P]=false;
                     break;
                 }
             }
@@ -459,14 +471,8 @@ int main()
                                 enemybullet[i].live=false;
                                 enemybulletcount--;
                                 playerlives--;
-
+                                phit=1;
                             }
-
-                            if(playerlives<=0)
-                            {
-                                gamestate=2;
-                            }
-
                         }
                     }
                     /*-------------------------------------------------------------------------*/
@@ -526,6 +532,38 @@ int main()
                                 }
                             }
                         }
+                    }
+
+                    if(phit==1)
+                    {
+                        if(phit!=0)
+                        {
+                            phitcount++;
+                        }
+
+                        if(phitcount<120)
+                        {
+                            if(++playerhit.frameCount >= playerhit.frameDelay)
+                            {
+                                if(++playerhit.curFrame >= playerhit.maxFrame)
+                                {
+                                    playerhit.curFrame = 0;
+                                }
+                                playerhit.frameCount = 0;
+                            }
+
+                            al_draw_bitmap_region(img_player_hit, playerhit.curFrame * playerhit.frameWidth, 0, playerhit.frameWidth, playerhit.frameHeight, player.x, player.y, 0);
+                        }
+
+                        if(phitcount>120)
+                        {
+                            phit=0;
+                        }
+                    }
+
+                    if(playerlives<=0)
+                    {
+                        gamestate=2;
                     }
                     /*-------------------------------------------------------------------------*/
 
@@ -694,24 +732,6 @@ int main()
                     }
 
 
-                    if(k>playerlives)
-                    {
-
-                            if(++playerhit.frameCount >= playerhit.frameDelay)
-                            {
-                                if(++playerhit.curFrame >= playerhit.maxFrame)
-                                {
-                                    playerhit.curFrame = 0;
-                                }
-                                playerhit.frameCount = 0;
-                            }
-
-                            al_draw_bitmap_region(img_player_hit, (playerhit.curFrame) * playerhit.frameWidth, 0, playerhit.frameWidth, playerhit.frameHeight, player.x, player.y, 0);
-
-
-                            k=playerlives;
-
-                    }
 
 
                     /*-------------------------------------------------------------------------*/
@@ -763,7 +783,7 @@ int main()
 
                     if(enemybulletcount)
                     {
-                        score++;
+                        score=enemybulletcount;
                     }
 
 
@@ -805,23 +825,39 @@ int main()
 
             break;
 
-            case 3:
+        case 3:
             al_wait_for_event(event_queue, &ev);
             if(ev.keyboard.keycode==ALLEGRO_KEY_ESCAPE)
-                {
-                    quit=true;
-                }
+            {
+                quit=true;
+            }
             if(ev.type==ALLEGRO_EVENT_TIMER)
             {
                 if(ev.timer.source==timer)
                 {
-                   // highscore_manipulation(ev, str);
+                    // highscore_manipulation(ev, str);
                     al_clear_to_color(al_map_rgb (0, 0, 0));
                     al_draw_textf(fonte, al_map_rgb(255, 255, 255), SCREEN_W/2, SCREEN_H/2+15, ALLEGRO_ALIGN_CENTRE, "Highscores");
                     al_flip_display();
                 }
             }
             break;
+
+        case 4:
+            al_wait_for_event(event_queue, &ev);
+            if(ev.keyboard.keycode==ALLEGRO_KEY_P)
+            {
+                gamestate=1;
+            }
+            if(ev.type==ALLEGRO_EVENT_TIMER)
+            {
+                if(ev.timer.source==timer)
+                {
+                    al_clear_to_color(al_map_rgb (0, 0, 0));
+                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), SCREEN_W/2, SCREEN_H/2+15, ALLEGRO_ALIGN_CENTRE, "Paused");
+                    al_flip_display();
+                }
+            }
         }
     }
 

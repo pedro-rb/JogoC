@@ -11,7 +11,7 @@
 #define SCREEN_H 800
 #define ENEMY1_MAX 11
 #define ENEMY_BULLETS_MAX 20000
-#define FPS 60.0
+#define ENEMY_CHANCE 100
 
 enum
 {
@@ -21,7 +21,6 @@ enum
     KEY_DOWN,
     KEY_SPACE,
     KEY_ESCAPE,
-    KEY_P,
     KEY_MAX
 
 };
@@ -61,17 +60,17 @@ void enemyshot(s_Object *enemy, s_Object *bullet, int *bulletcount)
 
 void player_collision_wall(s_Object *player, ALLEGRO_BITMAP* img_player)
 {
-    if(player->x < 76)
+    if(player->x < 56)
     {
-        player->x = 76;
+        player->x = 56;
     }
     if(player->y < 36)
     {
         player->y = 36;
     }
-    if(player->x > (SCREEN_W-70) - al_get_bitmap_width(img_player))
+    if(player->x > (SCREEN_W-50) - al_get_bitmap_width(img_player))
     {
-        player->x = (SCREEN_W-70) - al_get_bitmap_width(img_player);
+        player->x = (SCREEN_W-50) - al_get_bitmap_width(img_player);
     }
     if(player->y > (SCREEN_H-52) - al_get_bitmap_height(img_player))
     {
@@ -110,17 +109,26 @@ int main()
     srand(time(NULL));
 
     int i;
+    int k=3;
     int velocidade_tiro=50;
     int enemybulletcount=0;
     int gamestate=0;
     int playerstate=0;
-    int playerlives=3;
+    int playerlives=100;
     int maconha=30;
-    int patolino=45;
+    int patolino=60;
+    int cachaca=90;
     int score=0;
-    int phit=0;
-    int phitcount=0;
     bool quit=false;
+    int efeitomaconha=0;
+    int timermaconha=0;
+    int efeitocachaca=0;
+    int timercachaca=0;
+    int efeitolsd=0;
+    int timerlsd=0;
+    int velocidade=3;
+    int velocidade_vida=60;
+
 
     ALLEGRO_DISPLAY* display;
     ALLEGRO_TIMER* timer;
@@ -134,6 +142,7 @@ int main()
     ALLEGRO_BITMAP* img_enemyBullet1;
     ALLEGRO_BITMAP* img_enemyBullet2;
     ALLEGRO_BITMAP* img_enemyBullet3;
+    ALLEGRO_BITMAP* img_enemyBullet4;
     ALLEGRO_BITMAP* img_player_sheet;
     ALLEGRO_BITMAP* img_player_idle;
     ALLEGRO_BITMAP* img_player_dead;
@@ -154,7 +163,7 @@ int main()
     s_Object enemy1[ENEMY1_MAX];
     for(i=0; i<ENEMY1_MAX; i++)
     {
-        enemy1[i].x=(i%11)*32+76;
+        enemy1[i].x=(i%11)*32+88;
         enemy1[i].y=(i/11)*32;
         enemy1[i].live=true;
     }
@@ -190,6 +199,14 @@ int main()
         enemybullet3[i].x=i;
         enemybullet3[i].y=i+5;
         enemybullet3[i].live=false;
+    }
+
+    s_Object enemybullet4[ENEMY_BULLETS_MAX];
+    for(i=0; i<ENEMY_BULLETS_MAX; i++)
+    {
+        enemybullet4[i].x=i;
+        enemybullet4[i].y=i+5;
+        enemybullet4[i].live=false;
     }
 
 
@@ -244,7 +261,7 @@ int main()
 
     display=al_create_display(SCREEN_W, SCREEN_H);
 
-    timer = al_create_timer(1/FPS);
+    timer = al_create_timer(1/60.0);
 
     img_player=al_load_bitmap("sprites/player.png");
     img_enemy1=al_load_bitmap("sprites/enemya.png");
@@ -253,6 +270,7 @@ int main()
     img_enemyBullet2=al_load_bitmap("sprites/patolino.png");
     img_street=al_load_bitmap("sprites/street.png");
     img_enemyBullet3=al_load_bitmap("sprites/cachaca.png");
+    img_enemyBullet4=al_load_bitmap("sprites/vida.png");
     img_player_sheet=al_load_bitmap("sprites/player_sheet.png");
     img_player_idle=al_load_bitmap("sprites/player_idle.png");
     img_player_dead=al_load_bitmap("sprites/player_dead.png");
@@ -269,6 +287,7 @@ int main()
     al_convert_mask_to_alpha(img_player_sheet, al_map_rgb(255, 0, 255));
     al_convert_mask_to_alpha(img_player_idle, al_map_rgb(255, 0, 255));
     al_convert_mask_to_alpha(img_enemyBullet3, al_map_rgb(255, 0, 255));
+    al_convert_mask_to_alpha(img_enemyBullet4, al_map_rgb(255, 255, 255));
     al_convert_mask_to_alpha(img_player_dead, al_map_rgb(255, 0, 255));
     al_convert_mask_to_alpha(img_player_hit, al_map_rgb(255, 0, 255));
 
@@ -319,10 +338,6 @@ int main()
             {
                 quit=true;
             }
-            if(ev.keyboard.keycode==ALLEGRO_KEY_P)
-            {
-                gamestate=4;
-            }
 
             if(ev.type==ALLEGRO_EVENT_KEY_DOWN)
             {
@@ -343,9 +358,6 @@ int main()
                     break;
                 case ALLEGRO_KEY_ESCAPE:
                     keys[KEY_ESCAPE]=true;
-                    break;
-                case ALLEGRO_KEY_P:
-                    keys[KEY_P]=true;
                     break;
                 }
             }
@@ -371,12 +383,8 @@ int main()
                 case ALLEGRO_KEY_ESCAPE:
                     keys[KEY_ESCAPE]=false;
                     break;
-                case ALLEGRO_KEY_P:
-                    keys[KEY_P]=false;
-                    break;
                 }
             }
-            printf("%d\n", velocidade_tiro);
             /*-------------------------------------------------------------------------*/
             if ( 20 > enemybulletcount && enemybulletcount > 2)
             {
@@ -384,15 +392,15 @@ int main()
             };
             if ( 45 > enemybulletcount && enemybulletcount > 20)
             {
-                velocidade_tiro = 40;
+                velocidade_tiro = 60;
             };
             if ( 60 > enemybulletcount && enemybulletcount > 45)
             {
-                velocidade_tiro = 35;
+                velocidade_tiro = 45;
             };
             if ( 100 > enemybulletcount && enemybulletcount > 60)
             {
-                velocidade_tiro = 30;
+                velocidade_tiro = 48;
             };
             /*-------------------------------------------------------------------------*/
 
@@ -428,7 +436,7 @@ int main()
                             enemyshot(&enemy1[coluna], enemybullet2, &enemybulletcount);
                         }
                     }
-                    if (enemybulletcount > patolino)
+                    if (enemybulletcount > cachaca)
                     {
 
 
@@ -439,25 +447,82 @@ int main()
                             enemyshot(&enemy1[coluna], enemybullet3, &enemybulletcount);
                         }
                     }
+                    if (enemybulletcount > velocidade_vida)
+                    {
+
+                        if(rand() % 1000 == 0)
+                        {
+                            int coluna;
+                            coluna=rand()%11;
+                            enemyshot(&enemy1[coluna], enemybullet4, &enemybulletcount);
+                        }
+                    }
 
                     /*-------------------------------------------------------------------------*/
 
+                    timermaconha++;
+                    timercachaca++;
+                    timerlsd++;
+
+                    if(efeitocachaca==1 && efeitomaconha==1)
+                    {
+                        velocidade=-1;
+                        if(timermaconha && timercachaca>200)
+                        {
+                            efeitomaconha=0;
+                            efeitocachaca=0;
+                        }
+                    }
+                    if(efeitocachaca==1 && efeitomaconha==0)
+                    {
+                        velocidade=-3;
+                        if(timercachaca>200)
+                        {
+                            efeitocachaca=0;
+                            efeitomaconha=0;
+                        }
+                    }
+
+
+
+                    printf("%d\n",timermaconha);
+                    if(efeitomaconha==1 && efeitocachaca==0)
+                    {
+                        velocidade=1;
+                        if(timermaconha>200)
+                        {
+                            efeitomaconha=0;
+                            efeitocachaca=0;
+                        }
+                    }
+                    if (efeitomaconha==0 && efeitocachaca==0)
+                        velocidade=3;
+
                     if(keys[KEY_DOWN])
                     {
-                        player.y+=3;
+                        player.y+=velocidade;
                     }
                     if(keys[KEY_UP])
                     {
-                        player.y-=3;
+                        player.y-=velocidade;
                     }
                     if(keys[KEY_LEFT])
                     {
-                        player.x-=3;
+                        player.x-=velocidade;
                     }
                     if(keys[KEY_RIGHT])
                     {
-                        player.x+=3;
+                        player.x+=velocidade;
                     }
+                    if(efeitolsd==1)
+                    {
+                        al_clear_to_color(al_map_rgb(rand()%255, rand()%255, rand()%255));
+                        if(timerlsd>200)
+                        {
+                            efeitolsd=0;
+                        }
+                    }
+
                     /*-------------------------------------------------------------------------*/
                     for(i=0; i<ENEMY_BULLETS_MAX; i++)
                     {
@@ -470,9 +535,15 @@ int main()
                             {
                                 enemybullet[i].live=false;
                                 enemybulletcount--;
-                                playerlives--;
-                                phit=1;
+                                playerlives-=2;
+
                             }
+
+                            if(playerlives<=0)
+                            {
+                                gamestate=2;
+                            }
+
                         }
                     }
                     /*-------------------------------------------------------------------------*/
@@ -489,7 +560,29 @@ int main()
                                 {
                                     enemybullet1[i].live=false;
                                     enemybulletcount--;
-                                    playerlives--;
+                                    playerlives-=5;
+                                    efeitomaconha=1;
+                                    timermaconha=0;
+                                }
+                            }
+                        }
+                    }
+
+                    /*-------------------------------------------------------------------------*/
+                    if ( enemybulletcount > velocidade_vida )
+                    {
+                        for(i=0; i<ENEMY_BULLETS_MAX; i++)
+                        {
+                            if(enemybullet4[i].live)
+                            {
+                                enemybullet4[i].y+=7;
+
+                                if(enemybullet4[i].x<player.x+al_get_bitmap_width(img_player) && player.x<enemybullet4[i].x+al_get_bitmap_width(img_enemyBullet1) &&
+                                        (enemybullet4[i].y<player.y+al_get_bitmap_height(img_player) && player.y<enemybullet4[i].y+al_get_bitmap_height(img_enemyBullet4)))
+                                {
+                                    enemybullet4[i].live=false;
+                                    enemybulletcount--;
+                                    playerlives+=3;
                                 }
                             }
                         }
@@ -509,13 +602,15 @@ int main()
                                 {
                                     enemybullet2[i].live=false;
                                     enemybulletcount--;
-                                    playerlives--;
+                                    playerlives-=10;
+                                    efeitolsd=1;
+                                    timerlsd=0;
                                 }
                             }
                         }
                     }
                     /*-------------------------------------------------------------------------*/
-                    if ( enemybulletcount > patolino)
+                    if ( enemybulletcount > cachaca)
                     {
                         for(i=0; i<ENEMY_BULLETS_MAX; i++)
                         {
@@ -528,50 +623,26 @@ int main()
                                 {
                                     enemybullet3[i].live=false;
                                     enemybulletcount--;
-                                    playerlives--;
+                                    playerlives-=4;
+                                    efeitocachaca=1;
+                                    timercachaca=0;
                                 }
                             }
                         }
                     }
 
-                    if(phit==1)
-                    {
-                        if(phit!=0)
-                        {
-                            phitcount++;
-                        }
-
-                        if(phitcount<120)
-                        {
-                            if(++playerhit.frameCount >= playerhit.frameDelay)
-                            {
-                                if(++playerhit.curFrame >= playerhit.maxFrame)
-                                {
-                                    playerhit.curFrame = 0;
-                                }
-                                playerhit.frameCount = 0;
-                            }
-
-                            al_draw_bitmap_region(img_player_hit, playerhit.curFrame * playerhit.frameWidth, 0, playerhit.frameWidth, playerhit.frameHeight, player.x, player.y, 0);
-                        }
-
-                        if(phitcount>120)
-                        {
-                            phit=0;
-                        }
-                    }
-
-                    if(playerlives<=0)
-                    {
-                        gamestate=2;
-                    }
                     /*-------------------------------------------------------------------------*/
 
                     player_collision_wall(&player, img_player);
 
-                    al_draw_bitmap(img_street, 0, 0, 0);
+                    if(!efeitolsd==1)
+                    {
+                        al_draw_bitmap(img_street, 0, 0, 0);
+                    }
+                    char b = '%';
 
-                    al_draw_textf(fonte, al_map_rgb(0, 100, 255), 90, 750, 0, "Vidas restantes: %d", playerlives);
+
+                    al_draw_textf(fonte, al_map_rgb(0, 100, 255), 90, 750, 0, "Vida: %d%c", playerlives,b);
 
                     al_draw_textf(fonte, al_map_rgb(255, 0, 255), 90, 780, 0, "Score: %d", score);
 
@@ -732,6 +803,24 @@ int main()
                     }
 
 
+                    if(k>playerlives)
+                    {
+
+                        if(++playerhit.frameCount >= playerhit.frameDelay)
+                        {
+                            if(++playerhit.curFrame >= playerhit.maxFrame)
+                            {
+                                playerhit.curFrame = 0;
+                            }
+                            playerhit.frameCount = 0;
+                        }
+
+                        al_draw_bitmap_region(img_player_hit, (playerhit.curFrame) * playerhit.frameWidth, 0, playerhit.frameWidth, playerhit.frameHeight, player.x, player.y, 0);
+
+
+                        k=playerlives;
+
+                    }
 
 
                     /*-------------------------------------------------------------------------*/
@@ -781,9 +870,20 @@ int main()
                         }
                     }
 
+                    if ( enemybulletcount > 1)
+                    {
+                        for(i=0; i<ENEMY_BULLETS_MAX; i++)
+                        {
+                            if(enemybullet4[i].live)
+                            {
+                                al_draw_bitmap(img_enemyBullet4, enemybullet4[i].x, enemybullet4[i].y, 0);
+                            }
+                        }
+                    }
+
                     if(enemybulletcount)
                     {
-                        score=enemybulletcount;
+                        score++;
                     }
 
 
@@ -842,22 +942,6 @@ int main()
                 }
             }
             break;
-
-        case 4:
-            al_wait_for_event(event_queue, &ev);
-            if(ev.keyboard.keycode==ALLEGRO_KEY_P)
-            {
-                gamestate=1;
-            }
-            if(ev.type==ALLEGRO_EVENT_TIMER)
-            {
-                if(ev.timer.source==timer)
-                {
-                    al_clear_to_color(al_map_rgb (0, 0, 0));
-                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), SCREEN_W/2, SCREEN_H/2+15, ALLEGRO_ALIGN_CENTRE, "Paused");
-                    al_flip_display();
-                }
-            }
         }
     }
 
@@ -873,6 +957,7 @@ int main()
     al_destroy_bitmap(img_enemyBullet1);
     al_destroy_bitmap(img_enemyBullet2);
     al_destroy_bitmap(img_enemyBullet3);
+    al_destroy_bitmap(img_enemyBullet4);
     al_destroy_bitmap(img_player_hit);
     al_destroy_bitmap(img_background_dead);
     al_destroy_bitmap(img_welcome_background);

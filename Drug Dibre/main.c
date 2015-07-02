@@ -23,7 +23,9 @@ enum
     KEY_DOWN,
     KEY_SPACE,
     KEY_ESCAPE,
+    KEY_ENTER,
     KEY_P,
+    KEY_I,
     KEY_MAX
 
 };
@@ -127,6 +129,8 @@ int main()
     ALLEGRO_BITMAP* img_background_dead;
     ALLEGRO_BITMAP* img_player_hit;
     ALLEGRO_BITMAP* img_welcome_background;
+    ALLEGRO_BITMAP* img_howtoplay;
+    ALLEGRO_BITMAP* img_info;
 
     ALLEGRO_SAMPLE* gamesound;
     ALLEGRO_SAMPLE* lifeup;
@@ -256,9 +260,12 @@ int main()
     img_player_dead=al_load_bitmap("sprites/player_dead.png");
     img_background_dead=al_load_bitmap("sprites/background_dead.png");
     img_player_hit=al_load_bitmap("sprites/player_hit.png");
-    img_welcome_background=al_load_bitmap("sprites/main.png");
+    img_welcome_background=al_load_bitmap("sprites/intro.png");
+    img_howtoplay=al_load_bitmap("sprites/howtoplay.png");
+    img_info=al_load_bitmap("sprites/info.png");
     gamesound=al_load_sample("sounds/songdefault.wav");
     lifeup=al_load_sample("sounds/1up.wav");
+    fonte=al_load_ttf_font("fonts/SHOWG.ttf", 24, 0);
 
     al_convert_mask_to_alpha(img_player, al_map_rgb(255, 0, 255));
     al_convert_mask_to_alpha(img_enemy1, al_map_rgb(255, 255, 255));
@@ -283,7 +290,6 @@ int main()
     al_set_sample_instance_playmode(lifeupInstance, ALLEGRO_PLAYMODE_ONCE);
     al_attach_sample_instance_to_mixer(lifeupInstance, al_get_default_mixer());
 
-    fonte=al_load_ttf_font("fonts/SHOWG.ttf", 24, 0);
 
     event_queue=al_create_event_queue();
 
@@ -309,15 +315,18 @@ int main()
                 {
                     gamestate=1;
                 }
+                if(ev.keyboard.keycode==ALLEGRO_KEY_I)
+                {
+                    gamestate=4;
+                }
             }
 
             if(ev.type==ALLEGRO_EVENT_TIMER)
             {
                 if(ev.timer.source==timer)
                 {
+                    al_play_sample_instance(gamesoundInstance);
                     al_draw_bitmap(img_welcome_background, 0, 0, 0);
-                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), SCREEN_W/2, SCREEN_H/2-150, ALLEGRO_ALIGN_CENTRE, "Drug Dibre!");
-                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), SCREEN_W/2, SCREEN_H/2-120, ALLEGRO_ALIGN_CENTRE, "Press space to play!");
                     al_flip_display();
                 }
             }
@@ -357,6 +366,12 @@ int main()
                 case ALLEGRO_KEY_P:
                     keys[KEY_P]=true;
                     break;
+                case ALLEGRO_KEY_I:
+                    keys[KEY_I]=true;
+                    break;
+                case ALLEGRO_KEY_ENTER:
+                    keys[KEY_ENTER]=true;
+                    break;
                 }
             }
 
@@ -383,6 +398,12 @@ int main()
                     break;
                 case ALLEGRO_KEY_P:
                     keys[KEY_P]=false;
+                    break;
+                case ALLEGRO_KEY_I:
+                    keys[KEY_I]=false;
+                    break;
+                case ALLEGRO_KEY_ENTER:
+                    keys[KEY_ENTER]=false;
                     break;
                 }
             }
@@ -936,6 +957,7 @@ int main()
             {
                 if(ev.timer.source==timer)
                 {
+                    al_stop_sample_instance(gamesoundInstance);
                     al_clear_to_color(al_map_rgb (0, 0, 0));
                     al_draw_textf(fonte, al_map_rgb(255, 255, 255), SCREEN_W/2, SCREEN_H/2+15, ALLEGRO_ALIGN_CENTRE, "Paused");
                     al_draw_textf(fonte, al_map_rgb(255, 255, 255), SCREEN_W/2, SCREEN_H/2+45, ALLEGRO_ALIGN_CENTRE, "Aperte espaco ou P para continuar");
@@ -943,6 +965,49 @@ int main()
                 }
             }
             break;
+
+
+        case 4:
+            al_wait_for_event(event_queue, &ev);
+            if(ev.type==ALLEGRO_EVENT_DISPLAY_CLOSE || ev.keyboard.keycode==ALLEGRO_KEY_ESCAPE)
+            {
+                quit=true;
+            }
+            if(ev.keyboard.keycode==ALLEGRO_KEY_ENTER)
+            {
+                gamestate=5;
+            }
+            if(ev.type==ALLEGRO_EVENT_TIMER)
+            {
+                if(ev.timer.source==timer)
+                {
+                    al_draw_bitmap(img_howtoplay, 0, 0, 0);
+                    al_flip_display();
+                }
+            }
+            break;
+
+
+        case 5:
+            al_wait_for_event(event_queue, &ev);
+            if(ev.type==ALLEGRO_EVENT_DISPLAY_CLOSE || ev.keyboard.keycode==ALLEGRO_KEY_ESCAPE)
+            {
+                quit=true;
+            }
+            if(ev.keyboard.keycode==ALLEGRO_KEY_SPACE)
+            {
+                gamestate=1;
+            }
+            if(ev.type==ALLEGRO_EVENT_TIMER)
+            {
+                if(ev.timer.source==timer)
+                {
+                    al_draw_bitmap(img_info, 0, 0, 0);
+                    al_flip_display();
+                }
+            }
+            break;
+
         }
     }
 
@@ -962,6 +1027,8 @@ int main()
     al_destroy_bitmap(img_player_hit);
     al_destroy_bitmap(img_background_dead);
     al_destroy_bitmap(img_welcome_background);
+    al_destroy_bitmap(img_howtoplay);
+    al_destroy_bitmap(img_info);
     al_destroy_sample(gamesound);
     al_destroy_sample(lifeup);
     al_destroy_sample_instance(gamesoundInstance);

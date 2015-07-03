@@ -6,13 +6,13 @@ O personagem será controlado apenas por teclado.
 
 **Inimigos**
 Serão representados por drogas:
-- Maconha(o player fica lento).
-- Cigarro(Nada acontece).
-- LSD(a cor da tela trocará de cores).
-- Bebida(os controles do player são invertidos).
+- Maconha(o player fica lento e perde vida).
+- Cigarro(No player perde vida).
+- LSD(a cor da tela trocará de corese o player perde vida).
+- Cachaça(o player perde vida e seus controles são invertidose ).
 
 **Cenário**
-Cenário é carregado no ínicio e permanece fixo.
+Cenário é carregado no ínicio e permanece fixo até que o player seja atingido por um lsd.
 
 **Objetivo do player**
 Não ser atingido pelas drogas.

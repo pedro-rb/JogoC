@@ -1,19 +1,19 @@
 **Player**
-O jogo ter· apenas um personagem, que ter· movimento livre pela tela.
+O jogo ter√° apenas um personagem, que ter√° movimento livre pela tela.
 
 **Controle**
-O personagem ser· controlado apenas por teclado.
+O personagem ser√° controlado apenas por teclado.
 
 **Inimigos**
-Ser„o representados por drogas:
+Ser√£o representados por drogas:
 - Maconha(o player fica lento).
-- CocaÌna(o player fica muito r·pido).
-- LSD(a cor da tela trocar· de cores).
-- Crack(os controles do player s„o invertidos).
+- Cigarro(Nada acontece).
+- LSD(a cor da tela trocar√° de cores).
+- Bebida(os controles do player s√£o invertidos).
 
-**Cen·rio**
-Cen·rio È carregado no Ìnicio e permanece fixo.
+**Cen√°rio**
+Cen√°rio √© carregado no √≠nicio e permanece fixo.
 
 **Objetivo do player**
-N„o ser atingido pelas drogas.
+N√£o ser atingido pelas drogas.
 

@@ -263,7 +263,7 @@
 	<allegro5/allegro_font.h>
 	<allegro5/allegro_ttf.h>
 
-1435870919 source:d:\meus documentos\documents\pedro\ifsc\jogoprogc\jogoc\drug dibre\main.c
+1435889960 source:d:\meus documentos\documents\pedro\ifsc\jogoprogc\jogoc\drug dibre\main.c
 	<stdio.h>
 	<allegro5/allegro.h>
 	<allegro5/allegro_primitives.h>
@@ -791,7 +791,7 @@
 	<allegro5/allegro_font.h>
 	<allegro5/allegro_ttf.h>
 
-1435798993 source:c:\users\bruno\desktop\jogoc\drug dibre\main.c
+1435889960 source:c:\users\bruno\desktop\jogoc\drug dibre\main.c
 	<stdio.h>
 	<allegro5/allegro.h>
 	<allegro5/allegro_primitives.h>

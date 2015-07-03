@@ -1,3 +1,11 @@
+/*******************************************************
+Instituto Federal de Santa Catarina
+Alunos: Bruno Mengarda e Pedro Ruschel
+Turma: 722
+Disciplina: Programação C
+Professor: Fernando Pacheco
+Jogo: Drug Dibre
+*********************************************************/
 #include <stdio.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
@@ -15,6 +23,7 @@
 #define FPS 60.0
 #define lives 100
 
+//Definição das teclas
 enum
 {
     KEY_RIGHT,
@@ -32,6 +41,7 @@ enum
 
 bool keys[KEY_MAX];
 
+//Estrutura geral para player, inimigos e tiros
 typedef struct
 {
     int x;
@@ -40,6 +50,7 @@ typedef struct
 
 } s_Object;
 
+//Estrutura geral para animações
 typedef struct
 {
     int maxFrame;
@@ -51,7 +62,7 @@ typedef struct
 
 } spr_anim;
 
-
+//Função para o tiro dos inimigos
 void enemyshot(s_Object *enemy, s_Object *bullet, int *bulletcount)
 {
     if(*bulletcount<ENEMY_BULLETS_MAX)
@@ -63,6 +74,7 @@ void enemyshot(s_Object *enemy, s_Object *bullet, int *bulletcount)
     }
 }
 
+//Função para colisão do player com a parede
 void player_collision_wall(s_Object *player, ALLEGRO_BITMAP* img_player)
 {
     if(player->x < 76)
@@ -83,13 +95,14 @@ void player_collision_wall(s_Object *player, ALLEGRO_BITMAP* img_player)
     }
 }
 
+//Função principal
 int main()
 {
+    //Gerador Pseudo-Aleatório
     srand(time(NULL));
 
+    //Variáveis globais
     int i;
-    int k=lives;
-    int j=0;
     int velocidade_tiro=50;
     int enemybulletcount=0;
     int gamestate=0;
@@ -107,9 +120,12 @@ int main()
     int timerlsd=0;
     int velocidade=3;
     int velocidade_vida=60;
+    int timermusica=0;
+    int randinfo=0;
     char b = '%';
     bool quit=false;
 
+    //Argumentos para inicialização dos componentes do allegro
     ALLEGRO_DISPLAY* display;
     ALLEGRO_TIMER* timer;
     ALLEGRO_EVENT_QUEUE* event_queue;
@@ -127,33 +143,44 @@ int main()
     ALLEGRO_BITMAP* img_player_idle;
     ALLEGRO_BITMAP* img_player_dead;
     ALLEGRO_BITMAP* img_background_dead;
-    ALLEGRO_BITMAP* img_player_hit;
     ALLEGRO_BITMAP* img_welcome_background;
     ALLEGRO_BITMAP* img_howtoplay;
     ALLEGRO_BITMAP* img_info;
+    ALLEGRO_BITMAP* img_info_weed;
+    ALLEGRO_BITMAP* img_info_beer;
+    ALLEGRO_BITMAP* img_info_smoke;
+    ALLEGRO_BITMAP* img_info_lsd;
 
     ALLEGRO_SAMPLE* gamesound;
     ALLEGRO_SAMPLE* lifeup;
+    ALLEGRO_SAMPLE* darude;
+    ALLEGRO_SAMPLE* wasted;
 
     ALLEGRO_SAMPLE_INSTANCE* gamesoundInstance;
     ALLEGRO_SAMPLE_INSTANCE* lifeupInstance;
+    ALLEGRO_SAMPLE_INSTANCE* darudeInstance;
+    ALLEGRO_SAMPLE_INSTANCE* wastedInstance;
 
     ALLEGRO_FONT* fonte;
 
+    //Estrutura do player
     s_Object player;
     player.x=SCREEN_W/2;
     player.y=SCREEN_H/2;
     player.live=true;
 
+    //Estrutura do inimigo
     s_Object enemy1[ENEMY1_MAX];
     for(i=0; i<ENEMY1_MAX; i++)
     {
         enemy1[i].x=(i%11)*32+76;
-        enemy1[i].y=(i/11)*32;
+        enemy1[i].y=(i/11);
         enemy1[i].live=true;
     }
 
     /*-------------------------------------------------------------------------*/
+
+    //Estrutura do primeiro tipo de tiro
     s_Object enemybullet[ENEMY_BULLETS_MAX];
     for(i=0; i<ENEMY_BULLETS_MAX; i++)
     {
@@ -162,6 +189,7 @@ int main()
         enemybullet[i].live=false;
     }
 
+    //Estrutura do segundo tipo de tiro
     s_Object enemybullet1[ENEMY_BULLETS_MAX];
     for(i=0; i<ENEMY_BULLETS_MAX; i++)
     {
@@ -170,6 +198,7 @@ int main()
         enemybullet1[i].live=false;
     }
 
+    //Estrutura do terceiro tipo de tiro
     s_Object enemybullet2[ENEMY_BULLETS_MAX];
     for(i=0; i<ENEMY_BULLETS_MAX; i++)
     {
@@ -178,6 +207,7 @@ int main()
         enemybullet2[i].live=false;
     }
 
+    //Estrutura do quarto tipo de tiro
     s_Object enemybullet3[ENEMY_BULLETS_MAX];
     for(i=0; i<ENEMY_BULLETS_MAX; i++)
     {
@@ -186,6 +216,7 @@ int main()
         enemybullet3[i].live=false;
     }
 
+    //Estrutura do quinto tipo de tiro
     s_Object enemybullet4[ENEMY_BULLETS_MAX];
     for(i=0; i<ENEMY_BULLETS_MAX; i++)
     {
@@ -194,7 +225,7 @@ int main()
         enemybullet4[i].live=false;
     }
 
-
+    //Estrutura do player andando
     spr_anim playermove;
     playermove.maxFrame=2;
     playermove.curFrame=0;
@@ -203,6 +234,7 @@ int main()
     playermove.frameWidth=36;
     playermove.frameHeight=36;
 
+    //estrutura do player parado
     spr_anim playeridle;
     playeridle.maxFrame=2;
     playeridle.curFrame=0;
@@ -211,6 +243,7 @@ int main()
     playeridle.frameWidth=35;
     playeridle.frameHeight=35;
 
+    //estrutura da animação inimigo
     spr_anim enemymove;
     enemymove.maxFrame=2;
     enemymove.curFrame=0;
@@ -219,21 +252,14 @@ int main()
     enemymove.frameWidth=35;
     enemymove.frameHeight=35;
 
-    spr_anim playerhit;
-    playerhit.maxFrame=2;
-    playerhit.curFrame=0;
-    playerhit.frameCount=0;
-    playerhit.frameDelay=4;
-    playerhit.frameWidth=38;
-    playerhit.frameHeight=38;
-
-
+    //Laço para a utilização de teclas
     for(i=0; i<KEY_MAX; i++)
     {
         keys[i]=false;
 
     }
 
+    //Inicialização do allegro, addons, teclado, etc
     al_init();
     al_init_primitives_addon();
     al_install_keyboard();
@@ -243,10 +269,13 @@ int main()
     al_init_font_addon();
     al_init_ttf_addon();
 
+    //Cria o display
     display=al_create_display(SCREEN_W, SCREEN_H);
 
+    //Cria o timer
     timer = al_create_timer(1/FPS);
 
+    //Carregamento das imagens, áudios e fontes
     img_player=al_load_bitmap("sprites/player.png");
     img_enemy1=al_load_bitmap("sprites/enemya.png");
     img_enemyBullet=al_load_bitmap("sprites/crack.png");
@@ -259,14 +288,22 @@ int main()
     img_player_idle=al_load_bitmap("sprites/player_idle.png");
     img_player_dead=al_load_bitmap("sprites/player_dead.png");
     img_background_dead=al_load_bitmap("sprites/background_dead.png");
-    img_player_hit=al_load_bitmap("sprites/player_hit.png");
     img_welcome_background=al_load_bitmap("sprites/intro.png");
     img_howtoplay=al_load_bitmap("sprites/howtoplay.png");
     img_info=al_load_bitmap("sprites/info.png");
+    img_info_weed=al_load_bitmap("sprites/info_weed.png");
+    img_info_beer=al_load_bitmap("sprites/info_beer.png");
+    img_info_smoke=al_load_bitmap("sprites/info_smoke.png");
+    img_info_lsd=al_load_bitmap("sprites/info_lsd.png");
+
     gamesound=al_load_sample("sounds/songdefault.wav");
     lifeup=al_load_sample("sounds/1up.wav");
+    darude=al_load_sample("sounds/darude.wav");
+    wasted=al_load_sample("sounds/wasted.wav");
+
     fonte=al_load_ttf_font("fonts/SHOWG.ttf", 24, 0);
 
+    //Correção do fundo dos sprites
     al_convert_mask_to_alpha(img_player, al_map_rgb(255, 0, 255));
     al_convert_mask_to_alpha(img_enemy1, al_map_rgb(255, 255, 255));
     al_convert_mask_to_alpha(img_enemyBullet, al_map_rgb(0, 0, 0));
@@ -277,11 +314,12 @@ int main()
     al_convert_mask_to_alpha(img_enemyBullet3, al_map_rgb(255, 0, 255));
     al_convert_mask_to_alpha(img_enemyBullet4, al_map_rgb(255, 255, 255));
     al_convert_mask_to_alpha(img_player_dead, al_map_rgb(255, 0, 255));
-    al_convert_mask_to_alpha(img_player_hit, al_map_rgb(255, 0, 255));
     al_convert_mask_to_alpha(img_enemyBullet4, al_map_rgb(255, 0, 255));
 
-    al_reserve_samples(2);
+    //Define quantos áudios serão tocados ao mesmo tempo
+    al_reserve_samples(10);
 
+    //Instâncias de áudio
     gamesoundInstance=al_create_sample_instance(gamesound);
     al_set_sample_instance_playmode(gamesoundInstance, ALLEGRO_PLAYMODE_LOOP);
     al_attach_sample_instance_to_mixer(gamesoundInstance, al_get_default_mixer());
@@ -290,19 +328,33 @@ int main()
     al_set_sample_instance_playmode(lifeupInstance, ALLEGRO_PLAYMODE_ONCE);
     al_attach_sample_instance_to_mixer(lifeupInstance, al_get_default_mixer());
 
+    darudeInstance=al_create_sample_instance(darude);
+    al_set_sample_instance_playmode(darudeInstance, ALLEGRO_PLAYMODE_LOOP);
+    al_attach_sample_instance_to_mixer(darudeInstance, al_get_default_mixer());
 
+    wastedInstance=al_create_sample_instance(wasted);
+    al_set_sample_instance_playmode(wastedInstance, ALLEGRO_PLAYMODE_ONCE);
+    al_attach_sample_instance_to_mixer(wastedInstance, al_get_default_mixer());
+
+    //Cria a fila de eventos
     event_queue=al_create_event_queue();
 
+    //Registra as fontes dos eventos como display, timer e teclado
     al_register_event_source(event_queue, al_get_display_event_source(display));
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
     al_register_event_source(event_queue, al_get_keyboard_event_source());
 
+    //inicializa o timer
     al_start_timer(timer);
 
+    //Laço principal
     while(!quit)
     {
+        //Switch para trocar de menu para jogo, jogo para menu, etc
         switch(gamestate)
         {
+
+        //Tela inicial
         case 0:
             al_wait_for_event(event_queue, &ev);
             if(ev.type==ALLEGRO_EVENT_DISPLAY_CLOSE || ev.keyboard.keycode==ALLEGRO_KEY_ESCAPE)
@@ -332,6 +384,8 @@ int main()
             }
 
             break;
+
+        //Tela do jogo
         case 1:
             al_wait_for_event(event_queue, &ev);
             if(ev.type==ALLEGRO_EVENT_DISPLAY_CLOSE || ev.keyboard.keycode==ALLEGRO_KEY_ESCAPE)
@@ -408,6 +462,8 @@ int main()
                 }
             }
             /*-------------------------------------------------------------------------*/
+
+            //Frequência de disparo das drogas
             if ( 20 > enemybulletcount && enemybulletcount > 2)
             {
                 velocidade_tiro = 65;
@@ -430,8 +486,7 @@ int main()
             {
                 if(ev.timer.source==timer)
                 {
-                    /*-------------------------------------------------------------------------*/
-
+                    //Laços para randomização dos disparos
                     if(rand() % velocidade_tiro == 0)
                     {
                         int coluna;
@@ -482,10 +537,13 @@ int main()
 
                     /*-------------------------------------------------------------------------*/
 
+                    //Timer para os efeitos das drogas
                     timermaconha++;
                     timercachaca++;
                     timerlsd++;
+                    randinfo=rand()%4;
 
+                    //Efeito das drogas
                     if(efeitocachaca==1 && efeitomaconha==1)
                     {
                         velocidade=-1;
@@ -505,7 +563,6 @@ int main()
                         }
                     }
 
-                    printf("%d\n",timermaconha);
                     if(efeitomaconha==1 && efeitocachaca==0)
                     {
                         velocidade=1;
@@ -544,6 +601,8 @@ int main()
                     }
 
                     /*-------------------------------------------------------------------------*/
+
+                    //Colisão das drogas com o player
                     for(i=0; i<ENEMY_BULLETS_MAX; i++)
                     {
                         if(enemybullet[i].live)
@@ -556,14 +615,13 @@ int main()
                                 enemybullet[i].live=false;
                                 enemybulletcount--;
                                 playerlives-=2;
-
                             }
                         }
                     }
 
                     /*-------------------------------------------------------------------------*/
 
-                    if ( enemybulletcount > maconha)
+                    if (enemybulletcount > maconha)
                     {
                         for(i=0; i<ENEMY_BULLETS_MAX; i++)
                         {
@@ -586,7 +644,7 @@ int main()
 
                     /*-------------------------------------------------------------------------*/
 
-                    if ( enemybulletcount > velocidade_vida )
+                    if (enemybulletcount > velocidade_vida )
                     {
                         for(i=0; i<ENEMY_BULLETS_MAX; i++)
                         {
@@ -624,13 +682,15 @@ int main()
                                     playerlives-=10;
                                     efeitolsd=1;
                                     timerlsd=0;
+                                    timermusica=1;
+
                                 }
                             }
                         }
                     }
                     /*-------------------------------------------------------------------------*/
 
-                    if ( enemybulletcount > cachaca)
+                    if (enemybulletcount > cachaca)
                     {
                         for(i=0; i<ENEMY_BULLETS_MAX; i++)
                         {
@@ -653,28 +713,43 @@ int main()
 
                     /*-------------------------------------------------------------------------*/
 
+                    //Game Over
                     if(playerlives<=0)
                     {
                         gamestate=2;
+                        al_play_sample_instance(wastedInstance);
                     }
 
                     /*-------------------------------------------------------------------------*/
 
                     player_collision_wall(&player, img_player);
 
+                    //Desenha o bitmap de fundo
                     if(!efeitolsd==1)
                     {
                         al_draw_bitmap(img_street, 0, 0, 0);
                     }
 
+                    //Desenha a vida e a pontuação na tela
                     al_draw_textf(fonte, al_map_rgb(0, 100, 255), 90, 750, 0, "Vida: %d%c", playerlives,b);
 
                     al_draw_textf(fonte, al_map_rgb(255, 0, 255), 90, 780, 0, "Score: %d", score);
 
-                    al_play_sample_instance(gamesoundInstance);
+                    //Toca a música de fundo
+                    if(!timermusica==1)
+                    {
+                        al_play_sample_instance(gamesoundInstance);
+                    }
+
+                    if(timermusica==1)
+                    {
+                        al_stop_sample_instance(gamesoundInstance);
+                        al_play_sample_instance(darudeInstance);
+                    }
 
                     /*-------------------------------------------------------------------------*/
 
+                    //Movimentação dos inimigos
                     for(i=0; i<ENEMY1_MAX; i++)
                     {
                         if(enemy1[i].live)
@@ -695,6 +770,7 @@ int main()
 
                     /*-------------------------------------------------------------------------*/
 
+                    //Definição se o player está parado ou andando
                     if(!keys[KEY_UP] || !keys[KEY_DOWN] || !keys[KEY_LEFT] || !keys[KEY_RIGHT])
                     {
                         playerstate=0;
@@ -732,6 +808,7 @@ int main()
 
                     /*-------------------------------------------------------------------------*/
 
+                    //Animação do player
                     if(playerstate==0)
                     {
                         if(++playeridle.frameCount >= playeridle.frameDelay)
@@ -830,29 +907,9 @@ int main()
                         al_draw_bitmap_region(img_player_sheet, (playermove.curFrame) * playermove.frameWidth, 0, playermove.frameWidth, playermove.frameHeight, player.x, player.y, 0);
                     }
 
-
-                    if(k>playerlives)
-                    {
-                        if(k<j)
-                        {
-                            if(++playerhit.frameCount >= playerhit.frameDelay)
-                            {
-                                if(++playerhit.curFrame >= playerhit.maxFrame)
-                                {
-                                    playerhit.curFrame = 0;
-                                }
-                                playerhit.frameCount = 0;
-                            }
-
-                            al_draw_bitmap_region(img_player_hit, (playerhit.curFrame) * playerhit.frameWidth, 0, playerhit.frameWidth, playerhit.frameHeight, player.x, player.y, 0);
-                        }
-
-                        k=playerlives;
-
-                    }
-
                     /*-------------------------------------------------------------------------*/
 
+                    //Desenha a droga quando a mesma é atirada
                     for(i=0; i<ENEMY_BULLETS_MAX; i++)
                     {
                         if(enemybullet[i].live)
@@ -864,7 +921,7 @@ int main()
 
                     /*-------------------------------------------------------------------------*/
 
-                    if ( enemybulletcount > maconha)
+                    if (enemybulletcount > maconha)
                     {
                         for(i=0; i<ENEMY_BULLETS_MAX; i++)
                         {
@@ -877,7 +934,7 @@ int main()
 
                     /*-------------------------------------------------------------------------*/
 
-                    if ( enemybulletcount > patolino)
+                    if (enemybulletcount > patolino)
                     {
                         for(i=0; i<ENEMY_BULLETS_MAX; i++)
                         {
@@ -889,7 +946,7 @@ int main()
                     }
                     /*-------------------------------------------------------------------------*/
 
-                    if ( enemybulletcount > patolino)
+                    if (enemybulletcount > patolino)
                     {
                         for(i=0; i<ENEMY_BULLETS_MAX; i++)
                         {
@@ -900,7 +957,7 @@ int main()
                         }
                     }
 
-                    if ( enemybulletcount > 1)
+                    if (enemybulletcount > 1)
                     {
                         for(i=0; i<ENEMY_BULLETS_MAX; i++)
                         {
@@ -922,6 +979,7 @@ int main()
             }
             break;
 
+        //Game over
         case 2:
             al_wait_for_event(event_queue, &ev);
             if(ev.type==ALLEGRO_EVENT_KEY_DOWN)
@@ -936,6 +994,8 @@ int main()
             {
                 if(ev.timer.source==timer)
                 {
+                    al_stop_sample_instance(gamesoundInstance);
+                    al_stop_sample_instance(darudeInstance);
                     al_draw_bitmap(img_background_dead, 0, 0, 0);
                     al_draw_bitmap(img_player_dead, SCREEN_W/2-20, SCREEN_H/2-15, ALLEGRO_ALIGN_CENTER);
                     al_draw_textf(fonte, al_map_rgb(255, 255, 255), SCREEN_W/2, SCREEN_H/2+15, ALLEGRO_ALIGN_CENTRE, "Game Over!");
@@ -947,8 +1007,13 @@ int main()
 
             break;
 
+        //Jogo pausado
         case 3:
             al_wait_for_event(event_queue, &ev);
+            if(ev.type==ALLEGRO_EVENT_DISPLAY_CLOSE || ev.keyboard.keycode==ALLEGRO_KEY_ESCAPE)
+            {
+                quit=true;
+            }
             if(ev.keyboard.keycode==ALLEGRO_KEY_P || ev.keyboard.keycode==ALLEGRO_KEY_SPACE)
             {
                 gamestate=1;
@@ -957,16 +1022,34 @@ int main()
             {
                 if(ev.timer.source==timer)
                 {
+                    //Desenha as informações sobre drogas quando o jogo é pausado
+                    if(randinfo==0)
+                    {
+                        al_draw_bitmap(img_info_beer, 0, 0, 0);
+                    }
+                    else if(randinfo==1)
+                    {
+                        al_draw_bitmap(img_info_weed, 0, 0, 0);
+                    }
+                    else if(randinfo==2)
+                    {
+                        al_draw_bitmap(img_info_lsd, 0, 0, 0);
+                    }
+                    else if(randinfo==3)
+                    {
+                        al_draw_bitmap(img_info_smoke, 0, 0, 0);
+                    }
+
                     al_stop_sample_instance(gamesoundInstance);
-                    al_clear_to_color(al_map_rgb (0, 0, 0));
-                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), SCREEN_W/2, SCREEN_H/2+15, ALLEGRO_ALIGN_CENTRE, "Paused");
-                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), SCREEN_W/2, SCREEN_H/2+45, ALLEGRO_ALIGN_CENTRE, "Aperte espaco ou P para continuar");
+                    al_stop_sample_instance(darudeInstance);
+                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), SCREEN_W/2, SCREEN_H/2+300, ALLEGRO_ALIGN_CENTRE, "Paused");
+                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), SCREEN_W/2, SCREEN_H/2+325, ALLEGRO_ALIGN_CENTRE, "Aperte espaco ou P para continuar");
                     al_flip_display();
                 }
             }
             break;
 
-
+        //Tela de instruções
         case 4:
             al_wait_for_event(event_queue, &ev);
             if(ev.type==ALLEGRO_EVENT_DISPLAY_CLOSE || ev.keyboard.keycode==ALLEGRO_KEY_ESCAPE)
@@ -987,7 +1070,7 @@ int main()
             }
             break;
 
-
+        //Tela de informação sobre o jogo
         case 5:
             al_wait_for_event(event_queue, &ev);
             if(ev.type==ALLEGRO_EVENT_DISPLAY_CLOSE || ev.keyboard.keycode==ALLEGRO_KEY_ESCAPE)
@@ -1011,6 +1094,7 @@ int main()
         }
     }
 
+    //Destrói os componentes inicializados
     al_destroy_display(display);
     al_destroy_event_queue(event_queue);
     al_destroy_timer(timer);
@@ -1024,16 +1108,22 @@ int main()
     al_destroy_bitmap(img_enemyBullet2);
     al_destroy_bitmap(img_enemyBullet3);
     al_destroy_bitmap(img_enemyBullet4);
-    al_destroy_bitmap(img_player_hit);
     al_destroy_bitmap(img_background_dead);
     al_destroy_bitmap(img_welcome_background);
     al_destroy_bitmap(img_howtoplay);
     al_destroy_bitmap(img_info);
+    al_destroy_bitmap(img_info_weed);
+    al_destroy_bitmap(img_info_beer);
+    al_destroy_bitmap(img_info_smoke);
+    al_destroy_bitmap(img_info_lsd);
     al_destroy_sample(gamesound);
     al_destroy_sample(lifeup);
+    al_destroy_sample(darude);
+    al_destroy_sample(wasted);
     al_destroy_sample_instance(gamesoundInstance);
     al_destroy_sample_instance(lifeupInstance);
-
+    al_destroy_sample_instance(darudeInstance);
+    al_destroy_sample_instance(wastedInstance);
 
     return 0;
 }
